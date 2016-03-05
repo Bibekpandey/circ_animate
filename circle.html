@@ -1,0 +1,118 @@
+<html>
+<head>
+</head>
+<body>
+    <svg id="display" height="500" width="600"></svg>
+</body>
+
+<script>
+    
+    var g_colors = ['#404040',
+                '#6DBDD6',
+                '#B71427',
+                '#FFE658',
+                '#585858',
+                '#118C4E',
+                '#C1E1A6',
+                '#FF9009'
+        ]
+
+    var g_svg = document.getElementById('display');
+    var cx = 250,
+        cy = 250,
+        r = 250,
+        n = 20;
+
+    g_svg.setAttribute("style", "border:solid 1px black");
+    createCircle(cx, cy, r).setAttribute("class","circ-persistent");
+
+
+        // pause
+    timeoutLoop(drawlines, 250, 2,"red", 17, 500);
+
+    
+    function timeoutLoop(fn, param1, param2,param3, maxbound, delay) {
+        if (param2<maxbound) {
+            setTimeout(function() {
+                removeLines();
+                fn(param1, param2, param3);
+                timeoutLoop(fn, param1+10,param2+1, g_colors[(param2+1)%8], maxbound, delay);
+            }, delay);
+        }
+        else {
+            timeoutLoop(drawlines, 250, 2, "red", 17, 250);
+        }
+    }
+     
+    function createCircle(cx, cy, r, stroke, fill) {
+        if(stroke==undefined) stroke="black";
+        if(fill==undefined) fill="none";
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('class', 'temp');
+        circle.setAttribute('cx', cx.toString());
+        circle.setAttribute('cy', cy.toString());
+        circle.setAttribute('r', r.toString());
+        circle.setAttribute('stroke', stroke);
+        circle.setAttribute('fill', fill);
+        g_svg.appendChild(circle);
+        return circle;
+    }
+
+    function drawlines(n_points, timesof, stroke) {
+        var points = getpoints(cx, cy, r, n_points);
+        for(var x=0;x<n_points;x++) {
+            var mod = x*timesof % n_points;
+            drawline(points[x], points[mod], stroke);
+        }
+        //drawpoints(points);
+    }
+
+    function getpoints(cx, cy, r, n) {
+        var angle = 2*Math.PI/n;
+        var curr_ang = -Math.PI;
+        var points = [];
+        for(var x=0;x<n;x++) {
+            var temp = {};
+            temp.x = cx + r* Math.cos(curr_ang);
+            temp.y = cy + r* Math.sin(curr_ang);
+            curr_ang+=angle;
+            points.push(temp);
+        }
+        return points;
+    }
+
+    function drawpoints(points) {
+        for(var x in points) {
+            createCircle(points[x].x, points[x].y, 1,"red","red")
+        }
+    }
+
+    function drawline(p1,p2,stroke) {
+        if (stroke==undefined) stroke="black";
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute("class","temp");
+        line.setAttribute("x1", p1.x.toString());
+        line.setAttribute("x2", p2.x.toString());
+        line.setAttribute("y1", p1.y.toString());
+        line.setAttribute("y2", p2.y.toString());
+        line.setAttribute("stroke", stroke);
+        g_svg.appendChild(line);
+    }
+
+    function removeTemp() {
+        var elems = document.getElementsByClassName("temp");
+        for(var x=0;x<elems.length;x++) {
+            if(elems[x] != undefined)
+                elems[x].parentNode.removeChild(elems[x]);
+        }
+    }
+    function removeLines() {
+        var elems = document.getElementsByTagName("line");
+        for(var x=0;x<elems.length;x++) {
+                elems[x].parentNode.removeChild(elems[x]);
+        }
+
+    }
+
+</script>
+</html>
