@@ -3,7 +3,7 @@
         <script type="text/javascript" src="elements.js"></script>
     </head>
     <body>
-        <canvas id="tracer" width=500 height=500></canvas>
+        <canvas id="tracer" width=1000 height=1000></canvas>
     <body>
 
     <script>
@@ -14,7 +14,13 @@
 
         var canvasData = ctx.getImageData(0, 0, W, H);
 
-        var circle = new Circle(100, 100, 100);
+        var circle = new Circle(50, 100, 25);
+        circle.velocity=3;
+        var elem = new Circle(100, 100, 50);
+        //var elem1 = new Circle(80, 80, 15);
+        //var elem2 = new Circle(50, 50, 55);
+        //var elem3 = new Plane(0, 100, 50, 100);
+        elem.set_surface(circle);
         /*
         for(var i=0;i<3.15;i+=0.01) {
             var pos = circle.get_position(i);
@@ -24,11 +30,16 @@
 
         var time=0;
         function renderElems() {
-            if(time>3.14*2)return;
-            console.log(time);
-            pos = circle.get_position(time);
-            //ctx.fillRect(pos.x, pos.y, 1, 1);
-            setTimeout(renderElems, 1);
+            if(time>100)return;
+            var curr = circle.curr_position;
+            var pos = elem.get_position(time);
+            //console.log(JSON.stringify(pos));
+            //ctx.beginPath();
+            //ctx.moveTo(curr.x, curr.y);
+            //ctx.lineTo(pos.x, pos.y);
+            //ctx.stroke();
+            ctx.fillRect(pos.x, pos.y, 3, 3);
+            setTimeout(renderElems, 10);
             time+=0.01;
         }
 
