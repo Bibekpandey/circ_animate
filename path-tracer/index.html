@@ -14,36 +14,46 @@
 
         var canvasData = ctx.getImageData(0, 0, W, H);
 
-        var circle = new Circle(50, 100, 25);
-        circle.velocity=3;
-        var elem = new Circle(100, 100, 50);
-        //var elem1 = new Circle(80, 80, 15);
+
+        var elem= new Circle(50, 50, 50);
+        var circle = new Circle(100, 100, 50);
+        //var elem1 = new Circle(80, 80, 55);
         //var elem2 = new Circle(50, 50, 55);
         //var elem3 = new Plane(0, 100, 50, 100);
         elem.set_surface(circle);
-        /*
-        for(var i=0;i<3.15;i+=0.01) {
-            var pos = circle.get_position(i);
-            ctx.fillRect(pos.x, pos.y, 1, 1);
-        }
-        */
+        elem.velocity = 0.5;
+        circle.velocity = 15;
+
+        var elems = [circle, elem];
 
         var time=0;
-        function renderElems() {
-            if(time>100)return;
+        //circle.render(ctx);
+
+        //ctx.arc(100,100,100,2*Math.PI, false);
+        //ctx.stroke();
+
+        function renderElements(t) {
+            for(var x in elems) {
+                elems[x].render(t, ctx);
+            }
+            for(var x in elems) {
+                elems[x].update_position();
+            }
+        }
+        function renderPath() {
+            if(time>1)return;
             var curr = circle.curr_position;
-            var pos = elem.get_position(time);
-            //console.log(JSON.stringify(pos));
-            //ctx.beginPath();
-            //ctx.moveTo(curr.x, curr.y);
-            //ctx.lineTo(pos.x, pos.y);
-            //ctx.stroke();
-            ctx.fillRect(pos.x, pos.y, 3, 3);
-            setTimeout(renderElems, 10);
+            //var pos = elem.get_position(time);
+            renderElements(time);
+            //ctx.fillRect(pos.x, pos.y, 3, 3);
+            setTimeout(renderPath, 100);
             time+=0.01;
         }
 
-        renderElems();
+        function renderFunc() {
+        }
+
+        renderPath();
 
         function drawPixel (x, y, r, g, b, a) {
             r = r || 0;
