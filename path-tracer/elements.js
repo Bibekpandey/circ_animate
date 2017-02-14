@@ -7,6 +7,9 @@ var Point = function(x, y) {
 
 Point.prototype = {
     constructor: Point,
+    difference: function(x, y) {
+        return new Point(this.x-x, this.y-y);
+    },
 
     translate : function(x, y) {
         return new Point(this.x+x, this.y+y);
@@ -17,8 +20,8 @@ Point.prototype = {
     },
 
     rotate : function(angle, x, y) {
-        x = x || 0;
-        y = y || 0;
+        //x = x || 0;
+        //y = y || 0;
 
         var point = new Point(this.x-x, this.y-y).rotate_about_origin(angle);
         return point.translate(x, y);
@@ -35,10 +38,20 @@ Point.prototype = {
 };
 
 var Circle = function(x, y, r) {
-    this.center = new Point(x, y);
+    this.child = null;
+    this.surface = null;
+    this.curr_center = new Point(x, y);
     this.r = r;
-    this.curr_position = this.center.translate(r, 0); // means angle 0
-    this.new_position = null;
+    this.curr_point_position = this.curr_center.translate(r, 0);
+    this.velocity = 1;
+    this.point_velocity = 1;
+
+
+    /*this.previous_center = new Point(x, y);*/
+    //this.current_center = new Point(x, y);
+    //this.r = r;
+    //this.curr_point_position = this.current_center.translate(r, 0); // means angle 0
+    /*this.new_point_position = null;*/
     this.velocity = 1; //angular velocity
 
     this.circumference = 2*Math.PI*r;
@@ -49,31 +62,62 @@ var Circle = function(x, y, r) {
 Circle.prototype = {
     constructor: Circle,
 
-    offset : function(angle) {
-        var currpos = this.curr_position;
-        this.curr_position = this.curr_position.rotate(angle, this.center.x, this.center.y);
+    point_offset : function(angle) {
+        var currpos = this.curr_point_position;
+        this.curr_point_position = currpos.rotate(angle, this.curr_center.x, this.curr_center.y);
     },
 
-    get_position : function(t) {
-        this.new_position = this.curr_position.rotate(this.velocity*t, this.center.x, this.center.y);
-        var surface_point = this.surface!=null?this.surface.get_position(t):new Point(0,0);
-        return this.new_position.translate(surface_point.x, surface_point.y);
+    offset : function(x, y) {
     },
-    update_position : function() {
-        this.curr_position = this.new_position;
+
+    get_position : function(dt) {
+        if (this.surface !=null)
+            return this.surface.get_point_position(dt);
+        else return this.curr_center;
     },
+
+    get_point_position : function(dt) {
+        //this.get_position(); // updates center's position
+        var centerpos = this.curr_center;
+        var angle = this.point_velocity*dt;
+        var currpos = this.curr_point_position;
+        if (this.surface == null) {
+            var rotated = currpos.rotate(angle, centerpos.x, centerpos.y);
+            alert("point pos: center"+centerpos.x+","+centerpos.y + " curr_x "+currpos.x+ " curr_y "+currpos.y);
+            alert(" rotated "+ " x "+rotated.x+ " y "+rotated.y);
+        }
+        return currpos.rotate(angle, centerpos.x, centerpos.y);
+    },
+
+    update_position : function(dt) {
+        this.curr_center = this.get_position(dt);
+        if(this.surface!=null);
+            //alert(JSON.stringify(this.curr_center));
+    },
+
+    update_point_position : function(dt) {
+        this.curr_point_position = this.get_point_position(dt);
+        if(this.surface == null) {
+            alert("updated curr_point_position "+JSON.stringify(this.curr_point_position));
+        }
+    },
+
     set_surface: function(surface) {
         this.surface = surface;
+        surface.curr_point_position = this.surface.curr_point_position = this.curr_center;
+        surface.point_velocity = this.surface.point_velocity = this.velocity;
     },
-    render: function(t, ctx) {
-        var pt = new Point(0,0);
-        if(this.surface != null) {
-            pt = this.surface.get_position(t);
-        }
-        var new_c = this.center.translate(pt.x, pt.y);
+    set_child: function(shape) {
+        shape.surface = this;
+        this.curr_point_position = shape.curr_center;
+        this.point_velocity = shape.velocity;
+    },
+    render: function(ctx) {
         // draw circle here
-        ctx.arc(new_c.x, new_c.y, this.r, 2*Math.PI, false);
+        ctx.beginPath();
+        ctx.arc(this.curr_center.x, this.curr_center.y, this.r, 2*Math.PI, false);
         ctx.stroke();
+        ctx.closePath();
     }
 }
 
@@ -122,5 +166,6 @@ Plane.prototype = {
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
+        ctx.closePath();
     }
 }

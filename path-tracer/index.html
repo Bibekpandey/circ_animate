@@ -1,9 +1,24 @@
 <html>
     <head>
         <script type="text/javascript" src="elements.js"></script>
+        <script>
+            window.requestAnimFrame = (function(callback) {
+                return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+                function(callback) {
+                window.setTimeout(callback, 10);
+                };
+            })();
+        </script>
+        <style>
+            #container{ position:relative;}
+            .canv{ position:absolute; top:0px;left:0px;}
+        </style>
     </head>
     <body>
-        <canvas id="tracer" width=1000 height=1000></canvas>
+        <div id="container">
+            <canvas class="canv" id="tracer" width=1000 height=1000></canvas>
+            <canvas class="canv"id="tracer1" width=1000 height=1000></canvas>
+        </div>
     <body>
 
     <script>
@@ -12,42 +27,48 @@
         var H = canvas.height;
         var ctx = canvas.getContext('2d');
 
+        var canvas1 = document.getElementById('tracer1');
+        var ctx1 = canvas1.getContext('2d');
+        ctx1.fillStyle="blue";
+
         var canvasData = ctx.getImageData(0, 0, W, H);
 
 
-        var elem= new Circle(50, 50, 50);
-        var circle = new Circle(100, 100, 50);
-        //var elem1 = new Circle(80, 80, 55);
-        //var elem2 = new Circle(50, 50, 55);
-        //var elem3 = new Plane(0, 100, 50, 100);
-        elem.set_surface(circle);
-        elem.velocity = 0.5;
-        circle.velocity = 15;
+        var elem= new Circle(240, 100, 40);
+        var circle = new Circle(150, 100, 50);
+
+        elem.velocity = 1;
+        circle.velocity = 1;
+        //elem.set_surface(circle);
+        circle.set_child(elem);
 
         var elems = [circle, elem];
 
         var time=0;
-        //circle.render(ctx);
+        var dt = 0.1;
 
-        //ctx.arc(100,100,100,2*Math.PI, false);
-        //ctx.stroke();
-
-        function renderElements(t) {
+        function renderElements(dt) {
             for(var x in elems) {
-                elems[x].render(t, ctx);
+                elems[x].render(ctx);
             }
+            //return;
             for(var x in elems) {
-                elems[x].update_position();
+                elems[x].update_position(dt);
+            }
+            //alert(JSON.stringify(circle.curr_point_position));
+            for(var x in elems) {
+                elems[x].update_point_position(dt);
             }
         }
         function renderPath() {
-            if(time>1)return;
-            var curr = circle.curr_position;
-            //var pos = elem.get_position(time);
-            renderElements(time);
-            //ctx.fillRect(pos.x, pos.y, 3, 3);
-            setTimeout(renderPath, 100);
-            time+=0.01;
+            if(time>3.15)return;
+            //var pos = elem.get_position(dt);
+            ctx.clearRect(0,0,W,H);
+            renderElements(dt);
+            //ctx1.fillRect(pos.x, pos.y, 3, 3);
+            //requestAnimFrame(function(){renderPath()});
+            setTimeout(renderPath, 50);
+            time+=dt;
         }
 
         function renderFunc() {
