@@ -36,11 +36,12 @@
 
         var elem= new Circle(240, 100, 40);
         var circle = new Circle(150, 100, 50);
+        var elem1 = new Circle(300, 100, 20);
 
         elem.velocity = 1;
         circle.velocity = 1;
-        //elem.set_surface(circle);
-        circle.set_child(elem);
+        elem.set_surface(circle);
+        //circle.set_child(elem);
 
         var elems = [circle, elem];
 
@@ -61,13 +62,13 @@
             }
         }
         function renderPath() {
-            if(time>3.15)return;
-            //var pos = elem.get_position(dt);
+            if(time>2*3.15)return;
+            var pos = elem.get_point_position(dt);
             ctx.clearRect(0,0,W,H);
             renderElements(dt);
-            //ctx1.fillRect(pos.x, pos.y, 3, 3);
+            ctx1.fillRect(pos.x, pos.y, 3, 3);
             //requestAnimFrame(function(){renderPath()});
-            setTimeout(renderPath, 50);
+            setTimeout(renderPath, 40);
             time+=dt;
         }
 

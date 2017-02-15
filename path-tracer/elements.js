@@ -23,13 +23,18 @@ Point.prototype = {
         //x = x || 0;
         //y = y || 0;
 
-        var point = new Point(this.x-x, this.y-y).rotate_about_origin(angle);
+        var newp = new Point(this.x-x, this.y-y);
+        var point = newp.rotate_about_origin(angle);
         return point.translate(x, y);
     },
 
     rotate_about_origin : function(angle) {
+        var x = this.x, y=this.y;
+        var curr_angle = x==0?Math.PI/2:Math.atan(y/x);
+        if(x<0 && y<0) curr_angle+=Math.PI;
+        if(x<0 && y>0) curr_angle+=Math.PI;
         var r = this.magnitude();
-        return new Point(r*Math.cos(angle), r*Math.sin(angle));
+        return new Point(r*Math.cos(angle+curr_angle), r*Math.sin(angle+curr_angle));
     },
 
     magnitude : function() {
@@ -40,6 +45,8 @@ Point.prototype = {
 var Circle = function(x, y, r) {
     this.child = null;
     this.surface = null;
+    this.center = new Point(x, y);
+    this.point_position = this.center.translate(r, 0);
     this.curr_center = new Point(x, y);
     this.r = r;
     this.curr_point_position = this.curr_center.translate(r, 0);
@@ -80,26 +87,17 @@ Circle.prototype = {
         //this.get_position(); // updates center's position
         var centerpos = this.curr_center;
         var angle = this.point_velocity*dt;
+        this.point_position = this.point_position.rotate(angle, this.center.x, this.center.y);
         var currpos = this.curr_point_position;
-        if (this.surface == null) {
-            var rotated = currpos.rotate(angle, centerpos.x, centerpos.y);
-            alert("point pos: center"+centerpos.x+","+centerpos.y + " curr_x "+currpos.x+ " curr_y "+currpos.y);
-            alert(" rotated "+ " x "+rotated.x+ " y "+rotated.y);
-        }
         return currpos.rotate(angle, centerpos.x, centerpos.y);
     },
 
     update_position : function(dt) {
         this.curr_center = this.get_position(dt);
-        if(this.surface!=null);
-            //alert(JSON.stringify(this.curr_center));
     },
 
     update_point_position : function(dt) {
         this.curr_point_position = this.get_point_position(dt);
-        if(this.surface == null) {
-            alert("updated curr_point_position "+JSON.stringify(this.curr_point_position));
-        }
     },
 
     set_surface: function(surface) {
