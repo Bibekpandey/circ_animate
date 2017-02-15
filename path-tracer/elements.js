@@ -89,6 +89,8 @@ Circle.prototype = {
         var angle = this.point_velocity*dt;
         this.point_position = this.point_position.rotate(angle, this.center.x, this.center.y);
         var currpos = this.curr_point_position;
+        var d_centerpos = this.curr_center.difference(this.center.x, this.center.y);
+        return this.point_position.translate(d_centerpos.x, d_centerpos.y);
         return currpos.rotate(angle, centerpos.x, centerpos.y);
     },
 
