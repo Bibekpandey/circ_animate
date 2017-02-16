@@ -84,14 +84,12 @@ Circle.prototype = {
     },
 
     get_point_position : function(dt) {
-        //this.get_position(); // updates center's position
-        var centerpos = this.curr_center;
+        var newcenterpos = this.get_position(dt);
         var angle = this.point_velocity*dt;
-        this.point_position = this.point_position.rotate(angle, this.center.x, this.center.y);
         var currpos = this.curr_point_position;
-        var d_centerpos = this.curr_center.difference(this.center.x, this.center.y);
-        return this.point_position.translate(d_centerpos.x, d_centerpos.y);
-        return currpos.rotate(angle, centerpos.x, centerpos.y);
+        var rotated = currpos.rotate(angle, this.curr_center.x, this.curr_center.y);
+        var d_centerpos = newcenterpos.difference(this.curr_center.x, this.curr_center.y);
+        return rotated.translate(d_centerpos.x, d_centerpos.y);
     },
 
     update_position : function(dt) {
