@@ -13,6 +13,9 @@
     <script src="grid.js"></script>
     <script>
         var rule = [{'state':1, 'move':'right'},{'state':0, 'move':'left'}]
-        Grid('grid', rule).initialize();
+        var grid = Grid('grid', rule);
+        grid.initialize();
+        grid.renderElements();
+        //grid.doubleSize();
     </script>
 </html>
