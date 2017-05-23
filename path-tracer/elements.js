@@ -83,12 +83,16 @@ Circle.prototype = {
         else return this.curr_center;
     },
 
+    get_point_relative_position : function(dt) {
+        var angle = this.point_velocity*dt;
+        return this.point_position.rotate(angle, this.center.x, this.center.y);
+    },
+
     get_point_position : function(dt) {
         var newcenterpos = this.get_position(dt);
         var angle = this.point_velocity*dt;
-        var currpos = this.curr_point_position;
-        var rotated = currpos.rotate(angle, this.curr_center.x, this.curr_center.y);
-        var d_centerpos = newcenterpos.difference(this.curr_center.x, this.curr_center.y);
+        var rotated = this.get_point_relative_position(dt);
+        var d_centerpos = this.curr_center.difference(this.center.x, this.center.y);
         return rotated.translate(d_centerpos.x, d_centerpos.y);
     },
 
@@ -97,11 +101,14 @@ Circle.prototype = {
     },
 
     update_point_position : function(dt) {
-        this.curr_point_position = this.get_point_position(dt);
+        //this.curr_point_position = this.get_point_position(dt);
+        this.point_position = this.get_point_relative_position(dt);
     },
 
     set_surface: function(surface) {
         this.surface = surface;
+        this.surface.child = this;
+        this.surface.point_position = this.center;
         surface.curr_point_position = this.surface.curr_point_position = this.curr_center;
         surface.point_velocity = this.surface.point_velocity = this.velocity;
     },

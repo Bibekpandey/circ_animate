@@ -30,15 +30,17 @@
         var canvas1 = document.getElementById('tracer1');
         var ctx1 = canvas1.getContext('2d');
         ctx1.fillStyle="blue";
+        ctx1.strokeStyle="blue";
 
         var canvasData = ctx.getImageData(0, 0, W, H);
 
 
-        var elem= new Circle(240, 100, 40);
-        var circle = new Circle(150, 100, 50);
+        var elem= new Circle(250, 100, 60);
+        var circle = new Circle(150, 150, 50);
 
-        elem.velocity = 1;
-        circle.velocity = 1;
+        elem.velocity = 2;
+        elem.point_velocity=0.5;
+        circle.velocity = 0;
         elem.set_surface(circle);
         //circle.set_child(elem);
 
@@ -60,12 +62,15 @@
                 elems[x].update_point_position(dt);
             }
         }
+        ctx1.beginPath();
+        ctx1.moveTo(elem.get_point_position(0).x, elem.get_point_position(0).y);
         function renderPath() {
-            if(time>2*3.15)return;
+            if(time>3.15*2)return;
             var pos = elem.get_point_position(dt);
             ctx.clearRect(0,0,W,H);
             renderElements(dt);
-            ctx1.fillRect(pos.x, pos.y, 3, 3);
+            ctx1.lineTo(pos.x, pos.y, 3, 3);
+            ctx1.stroke();
             //requestAnimFrame(function(){renderPath()});
             setTimeout(renderPath, 40);
             time+=dt;
