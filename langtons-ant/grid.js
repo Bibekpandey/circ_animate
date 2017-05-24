@@ -8,8 +8,8 @@ function Grid(canvasid, rule) {
     var dir = UP;
     this.state = 0;
     var h2 = document.getElementById('counter');
-    var time = 10; // milli seconds
-    var MAXDOUBLE = 4;
+    var time = 5; // milli seconds
+    var MAXDOUBLE = 2;
     var double = 0;
     var interval_func;
 
@@ -188,6 +188,7 @@ function Grid(canvasid, rule) {
             }
             this.doubleSize();
             double++;
+            alert(double);
             this.renderElements();
         }
     }
