@@ -4,10 +4,16 @@
         <style type="text/css">
             body {
                 margin:0px;
+                background-color:#dddddd;
+            }
+            canvas {
+                margin:10px;
+                border:solid 1px;
             }
         </style>
     </head>
     <body>
+        <h1 id="counter"></h1>
         <canvas id="grid"></canvas>
     </body>
     <script src="grid.js"></script>
@@ -15,7 +21,9 @@
         var rule = [{'state':1, 'move':'right'},{'state':0, 'move':'left'}]
         var grid = Grid('grid', rule);
         grid.initialize();
-        grid.renderElements();
+        //grid.renderElements();
         //grid.doubleSize();
+        //grid.doubleSize();
+        //grid.renderElements();
     </script>
 </html>
