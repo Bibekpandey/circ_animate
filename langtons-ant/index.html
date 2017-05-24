@@ -10,20 +10,98 @@
                 margin:10px;
                 border:solid 1px;
             }
+            td,th {
+                border: solid 1px black;
+                padding:0px;
+                margin:0px;
+            }
         </style>
     </head>
     <body>
-        <h1 id="counter"></h1>
-        <canvas id="grid"></canvas>
+        <h1>Steps: <span id="counter"></span></h1>
+        <div>
+            <canvas id="grid" style="float:left"></canvas>
+            <div>
+                <h2> Define rules:
+                    <button type=button onclick="addRule()">Add Rule</button>
+                </h2>
+                <table>
+                    <tr>
+                        <th>in State(Color)</th>
+                        <th>Change State(color) to:</th>
+                        <th>Move(left/right)</th>
+                        <th>Action</th>
+                    </tr>
+                    <tbody id="rule">
+                        <tr>
+                            <td><input type="text"/></td>
+                            <td><input type="text"/></td>
+                            <td><input type="text"/></td>
+                            <td><button onclick="this.parentElement.parentElement.parentElement.removeChild(this.parentElement.parentElement)">Remove Rule</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button onclick="startAnt()">Start!!</button>
+            </div>
+        </div>
     </body>
     <script src="grid.js"></script>
     <script>
-        var rule = [{'state':1, 'move':'right'},{'state':0, 'move':'left'}]
-        var grid = Grid('grid', rule);
-        grid.initialize();
-        //grid.renderElements();
-        //grid.doubleSize();
-        //grid.doubleSize();
-        //grid.renderElements();
+        function addRule() {
+            var tr = document.createElement('tr');
+            for(var x=0;x<3;x++) {
+                var i1 = document.createElement('input');
+                var td1 = document.createElement('td');
+                td1.appendChild(i1);
+                tr.appendChild(td1);
+            }
+            var td4 = document.createElement('td');
+            var removebutton = document.createElement('button');
+            removebutton.innerHTML="Remove Rule";
+            removebutton.setAttribute("onclick",
+                "this.parentElement.parentElement.parentElement.removeChild(this.parentElement.parentElement);");
+            td4.appendChild(removebutton);
+
+            tr.appendChild(td4);
+            document.getElementById('rule').appendChild(tr);
+        }
+
+        var grid;
+
+        function startAnt() {
+            var colors = {};
+            var color_counter = 0;
+            var ruleelem = document.getElementById('rule');
+            var children = ruleelem.children;
+            var rule = {};
+            for(x in children) {
+                try {
+                    var color = children[x].children[0].children[0].value;
+                    if(colors[color]==undefined) {
+                        colors[color] = color_counter;
+                        color_counter++;
+                    }
+                    var changecolor = children[x].children[1].children[0].value;
+                    var move = children[x].children[2].children[0].value;
+                    rule[color] = {state:changecolor, move:move};
+                }
+                catch(err) {
+                }
+            }
+            // now we have rule
+            try {
+                grid.stop();
+            }catch(err){};
+
+            grid = Grid('grid', rule, colors);
+            grid.initialize();
+        }
+
+        var rules = {
+            'white': {'state': 'red', 'move':'right'},
+            'red': {'state': 'white', 'move': 'left'}
+        };
+        //var grid = Grid('grid', rule);
+        //grid.initialize();
     </script>
 </html>

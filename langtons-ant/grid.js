@@ -1,8 +1,8 @@
-function Grid(canvasid, rule) {
+function Grid(canvasid, rule, state_map) {
     var UP=0,LEFT=1,DOWN=2,RIGHT=3;
     var cols = 33; // TODO: from parameters
     var rows = 33; // TODO: from parameters
-    var grid_size = 32; // 32 px grid size
+    var grid_size = 16; // 32 px grid size
     this.fps = 60;
     var pos = {x:0,y:0};
     var dir = UP;
@@ -14,8 +14,16 @@ function Grid(canvasid, rule) {
     var interval_func;
 
     var canvas, context, elements;
+    /*var state_map = {*/
+        //'white':0,
+        //'red': 1,
+        //'blue': 2
+    /*}*/
+    var reverse_state_map = {
+    };
+    for(k in state_map) reverse_state_map[state_map[k]] = k;
 
-    var color = ['white', 'red', 'blue'];
+    //var color = ['white', 'red', 'blue'];
     this.printelements = function() {
         console.log(elements);
     }
@@ -100,7 +108,7 @@ function Grid(canvasid, rule) {
     }
 
     function renderCell(pos, state) {
-        context.fillStyle = color[state];
+        context.fillStyle = reverse_state_map[state];
         var x1 = pos.x*grid_size;
         var y1 = pos.y*grid_size;
         var newpos = position({x:x1, y:y1});
@@ -169,12 +177,12 @@ function Grid(canvasid, rule) {
         h2.innerHTML = this.counter;
         this.counter++;
         //console.log('update, pos', pos);
-        var state = getState(pos);
+        var state = reverse_state_map[getState(pos)];
         //console.log('update, state', state);
         var newstate = rule[state].state;
         var dirn;
-        renderCell(pos, newstate);
-        setState(pos, newstate);
+        renderCell(pos, state_map[newstate]);
+        setState(pos, state_map[newstate]);
         var move = rule[state].move;
         direction[move]();
         renderCell(pos, 2);
@@ -188,9 +196,12 @@ function Grid(canvasid, rule) {
             }
             this.doubleSize();
             double++;
-            alert(double);
             this.renderElements();
         }
+    }
+
+    this.stop = function() {
+        clearInterval(interval_func);
     }
 
     var renderGrid = function() {
