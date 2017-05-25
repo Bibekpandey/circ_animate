@@ -14,19 +14,11 @@ function Grid(canvasid, rule, state_map) {
     var interval_func;
 
     var canvas, context, elements;
-    /*var state_map = {*/
-        //'white':0,
-        //'red': 1,
-        //'blue': 2
-    /*}*/
     var reverse_state_map = {
     };
+    // create reverse map;
     for(k in state_map) reverse_state_map[state_map[k]] = k;
 
-    //var color = ['white', 'red', 'blue'];
-    this.printelements = function() {
-        console.log(elements);
-    }
     this.counter = 0;
 
     this.initialize = function() {
@@ -37,7 +29,7 @@ function Grid(canvasid, rule, state_map) {
         context = canvas.getContext('2d');
         elements = new Array(cols*rows);
         for(var x=0;x<elements.length;x++)elements[x]=0;
-        context.fillStyle="#aaaaaa"; // light grey
+        context.fillStyle="white";
         context.fillRect(0,0,canvas.width, canvas.height);
         interval_func = setInterval(this.update, time);
     }
@@ -107,8 +99,8 @@ function Grid(canvasid, rule, state_map) {
         return {x:pos.x+canvas.width/2-grid_size/2, y:-pos.y+canvas.height/2-grid_size/2};
     }
 
-    function renderCell(pos, state) {
-        context.fillStyle = reverse_state_map[state];
+    function renderCell(pos, state, col) {
+        context.fillStyle = col || reverse_state_map[state];
         var x1 = pos.x*grid_size;
         var y1 = pos.y*grid_size;
         var newpos = position({x:x1, y:y1});
@@ -185,7 +177,7 @@ function Grid(canvasid, rule, state_map) {
         setState(pos, state_map[newstate]);
         var move = rule[state].move;
         direction[move]();
-        renderCell(pos, 2);
+        renderCell(pos, 0,'black');
 
         // check if boundary
         if(checkBoundary()) {
