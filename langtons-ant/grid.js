@@ -29,7 +29,7 @@ function Grid(canvasid, rule, state_map) {
         context = canvas.getContext('2d');
         elements = new Array(cols*rows);
         for(var x=0;x<elements.length;x++)elements[x]=0;
-        context.fillStyle="white";
+        context.fillStyle=reverse_state_map[0];
         context.fillRect(0,0,canvas.width, canvas.height);
         interval_func = setInterval(this.update, time);
     }
@@ -60,25 +60,6 @@ function Grid(canvasid, rule, state_map) {
             }
         }
         elements = new_elements;
-        return;
-
-        var oldpos = pos;
-        pos = {x:oldcols/2+oldpos.x,y:oldrows/2+y};
-
-        var olddir = dir;
-        // render old elements
-        // clear first
-        context.fillStyle="#aaaaaa"; // light grey
-        context.fillRect(0,0,canvas.width, canvas.height);
-        // now fill elements
-        for(var y=0;y<oldrows;y++) {
-            for(var x=0;x<oldcols;x++) {
-                var newindex = (oldcols/2+y)*cols + oldrows/2+x;
-                var state = elements[newindex];
-                var p = {x:oldcols/2+x, y:oldrows/2+y};
-                renderCell(p, state);
-            }
-        }
     }
 
     function translateCoord(x,y) {
