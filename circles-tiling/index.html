@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <title>Circles Tiling</title>
+        <script type="text/javascript" src="index.js"></script>
+        <style>
+            #controller {
+                width:50%;
+                float:left;
+                min-height:500px;
+                background:#ddd;
+            }
+            #tiles-container {
+                width:49%;
+                float:left;
+            }
+            #tiles{
+                border:solid 0.5px blue;
+            }
+        </style>
+    </head>
+
+    <body>
+        <a href="https://bewakes.com">&lt;&lt;Home</a><br><br>
+        <div id="tiles-container">
+            <canvas id="tiles" height=500 width=500></canvas>
+        </div>
+        <div id="controller">
+        </div>
+    </body>
+
+    <script>
+        var canvas = document.getElementById('tiles');
+        var W = canvas.width;
+        var H = canvas.height;
+        var ctx = canvas.getContext('2d');
+
+        var circles_count = 5;
+
+        ctx.strokeStyle = "black";
+        for(var x=0;x<circles_count;x++) {
+            ctx.beginPath();
+            ctx.arc(random(500), random(500), random(80), 2*Math.PI, false);
+            ctx.stroke();
+            ctx.closePath();
+        }
+    </script>
+</html>
+
