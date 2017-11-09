@@ -6,15 +6,21 @@ function drawCircles() {
         c = createCircle();
         if (counter > 10000) return;
     }
+    while(isValid(c)) {
+        c.r++;
+    }
+    c.r-=2;
     g_circles.push(c);
-    drawCircle(c);
+    if (c.r <= g_max_r - 15) {
+        drawCircle(c);
+    }
     requestAnimationFrame(drawCircles);
 }
 
 function createCircle() {
     return {
-        x: Math.random()*500,
-        y: Math.random()*500,
+        x: Math.random()*600,
+        y: Math.random()*600,
         r: Math.ceil(Math.random()*g_max_r)
     }
 }
