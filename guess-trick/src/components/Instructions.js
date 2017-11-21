@@ -7,7 +7,7 @@ class Instructions extends Component {
     constructor(props) {
         super(props);
         this.instructions = [
-            "Choose one of the 2-digit numbers on the right side.",
+            "Choose one of the 2-digit numbers on the left side.",
             "Sum the digits of the number.",
             "Subtract the sum from the original number.",
             " is the symbol you got, ain't it?",
@@ -35,10 +35,10 @@ class Instructions extends Component {
     render () {
         return (
             <div className="instructions">
-                <div className="">
-                    <h3>{this.getCurrentText()}</h3>
+                <div className="instruction-text">
+                    <h1>{this.getCurrentText()}</h1>
                 </div>
-                <button onClick={this.nextStep} className="app-button">
+                <button onClick={this.nextStep} className="instruction-button">
                     Done
                 </button>
             </div>
