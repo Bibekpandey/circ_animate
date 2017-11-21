@@ -18,8 +18,9 @@ class App extends Component {
         <div className="App">
             <div className="App-header">
             <h2>Guessing Game</h2>
+            <a href="https://bewakes.com"> Home</a>
             </div>
-            <BlocksContainer rows={7} columns={12} setSymbol={this.getSymbol} />
+            <BlocksContainer rows={10} columns={12} setSymbol={this.getSymbol} />
             <Instructions  symbol={this.state.symbol} />
         </div>
         );

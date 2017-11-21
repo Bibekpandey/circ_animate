@@ -7,7 +7,7 @@ class Instructions extends Component {
     constructor(props) {
         super(props);
         this.instructions = [
-            "Choose one of the 2-digit numbers on the left side.",
+            "Choose one of the numbers on the left side[Not 1-digit number].",
             "Sum the digits of the number.",
             "Subtract the sum from the original number.",
             " is the symbol you got, ain't it?",
