@@ -24,10 +24,6 @@ const globals = {
 
 const elements = {
     pipes: [],
-    bird: {
-        x: 100,
-        y: 100,
-    },
 };
 
 
@@ -39,7 +35,14 @@ function start () {
 
 function initialize() {
     elements.pipes = [];
-    elements.bird = {x:100, y:100};
+    let img = new Image();
+    img.src='sprites.png';
+    elements.bird= {
+        x: 100,
+        y: globals.height/2,
+        vy: 0,
+        img: img
+    }
     // first initialize with 5 pipe pairs
     elements.pipes = Array.from(Array(globals.total_pipes).keys()).map(
         (x, i) => get_pipes_pair(i)
@@ -73,7 +76,7 @@ function spawnPipe() {
         // remove it from the list
         elements.pipes.splice(0, 1);
         // add new to last position
-        elements.pipes.push(get_pipes_pair(globals.total_pipes-1));
+        elements.pipes.push(get_pipes_pair(globals.total_pipes-2));
     }
 }
 
@@ -92,6 +95,13 @@ function renderBackground() {
 
 function renderBird() {
     context.fillStyle = globals.bird_color;
+    /*context.drawImage(*/
+        //elements.bird.img,
+        //elements.bird.x,
+        //elements.bird.y,
+        //globals.bird_size*1.33,
+        //globals.bird_size
+    /*)*/
     context.fillRect(elements.bird.x,elements.bird.y, globals.bird_size, globals.bird_size);
 }
 
@@ -129,8 +139,8 @@ function checkCollision() {
 }
 
 function updateBirdPosition() {
-    globals.vy += globals.ay;
-    elements.bird.y += globals.vy;
+    elements.bird.vy += globals.ay;
+    elements.bird.y += elements.bird.vy;
 }
 
 function updatePipesPosition() {

@@ -5,13 +5,13 @@
         </title>
     </head>
     <body>
-        <canvas id="flappy" width=600 height=600"></canvas>
+        <canvas id="flappy" width=1000 height=600"></canvas>
     </body>
     <script src="index.js"></script>
     <script>
         document.onkeypress = () => {
             if(globals.game_running) {
-                globals.vy = -1.15*globals.speed;
+                elements.bird.vy = -1.15*globals.speed;
             }
             else {
                 start();
