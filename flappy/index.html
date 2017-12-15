@@ -1,0 +1,15 @@
+<html>
+    <head>
+        <title>
+            Flappyyy
+        </title>
+    </head>
+    <body>
+        <canvas id="flappy" width=600 height=600"></canvas>
+    </body>
+    <script src="index.js"></script>
+    <script>
+        document.onkeypress = () => {globals.vy = -1.15*globals.speed;};
+        start();
+    </script>
+</html>
