@@ -9,7 +9,15 @@
     </body>
     <script src="index.js"></script>
     <script>
-        document.onkeypress = () => {globals.vy = -1.15*globals.speed;};
+        document.onkeypress = () => {
+            if(globals.game_running) {
+                globals.vy = -1.15*globals.speed;
+            }
+            else {
+                start();
+            }
+        };
+
         start();
     </script>
 </html>

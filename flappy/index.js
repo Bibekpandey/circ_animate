@@ -2,6 +2,7 @@ const canvas = document.getElementById('flappy');
 const context = canvas.getContext('2d');
 
 const globals = {
+    game_running: false,
     vertical_spacing: 175,
     gravity: 10,
     horizontal_spacing: 375,
@@ -31,11 +32,14 @@ const elements = {
 
 
 function start () {
+    globals.game_running=true;
     initialize();
     globals.interval_id = setInterval(update, 1000/globals.speed);
 }
 
 function initialize() {
+    elements.pipes = [];
+    elements.bird = {x:100, y:100};
     // first initialize with 5 pipe pairs
     elements.pipes = Array.from(Array(globals.total_pipes).keys()).map(
         (x, i) => get_pipes_pair(i)
@@ -58,6 +62,7 @@ function update() {
     renderElements();
     if (checkCollision()) {
         clearInterval(globals.interval_id);
+        globals.game_running = false;
         return;
     }
     //requestAnimationFrame(update);
