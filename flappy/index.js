@@ -1,5 +1,6 @@
 const canvas = document.getElementById('flappy');
 const context = canvas.getContext('2d');
+const scoreElem = document.getElementById('score');
 
 const globals = {
     game_running: false,
@@ -19,7 +20,9 @@ const globals = {
     speed: 20,
     vx: 10,
     vy: 10,
-    ay: 1.7
+    ay: 1.7,
+    score: 0,
+    scoreUpdate: true
 };
 
 const elements = {
@@ -29,6 +32,8 @@ const elements = {
 
 function start () {
     globals.game_running=true;
+    globals.score = 0;
+    scoreElem.innerHTML = 0;
     initialize();
     globals.interval_id = setInterval(update, 1000/globals.speed);
 }
@@ -68,6 +73,7 @@ function update() {
         globals.game_running = false;
         return;
     }
+    updateScore();
     //requestAnimationFrame(update);
 }
 
@@ -77,6 +83,7 @@ function spawnPipe() {
         elements.pipes.splice(0, 1);
         // add new to last position
         elements.pipes.push(get_pipes_pair(globals.total_pipes-2));
+        globals.scoreUpdate = true;
     }
 }
 
@@ -136,6 +143,15 @@ function checkCollision() {
         }
     }
     return false;
+}
+function updateScore() {
+    if(elements.bird.x > (elements.pipes[0].x_pos + globals.pipe_width)) {
+        if(globals.scoreUpdate) {
+            globals.score += 1;
+            scoreElem.innerHTML = globals.score;
+            globals.scoreUpdate = false;
+        }
+    }
 }
 
 function updateBirdPosition() {
