@@ -14,15 +14,17 @@
     </body>
     <script src="index.js"></script>
     <script>
-        document.onkeypress = () => {
+        let globals = {};
+        var g = new Game();
+        document.onkeypress = (e) => {
+            var charcode = e.charCode;
             if(globals.game_running) {
                 elements.bird.vy = -1.15*globals.speed;
             }
             else {
-                start();
+                g.start();
             }
         };
-
-        start();
+        g.start();
     </script>
 </html>
