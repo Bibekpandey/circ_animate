@@ -14,16 +14,34 @@
     </body>
     <script src="index.js"></script>
     <script>
-        let globals = {};
-        var g = new Game();
+        // create birds
+
+        function getBirds() {
+            const birds =  [new Bird(), new Bird()];
+            birds[1].color = 'yellow';
+            birds[1].vy = 4;
+            return birds;
+        }
+
+        var g = new Game(getBirds());
+
         document.onkeypress = (e) => {
             var charcode = e.charCode;
-            if(globals.game_running) {
-                elements.bird.vy = -1.15*globals.speed;
+            var birds = g.elements.birds;
+            if (charcode == 107) {
+                birds[0].vy = -20;
             }
-            else {
-                g.start();
+            else if (charcode == 106) {
+                birds[1].vy = -20;
             }
+            else if (charcode == 32) {
+                if(g.over) {
+                    g = new Game(getBirds());
+                    g.start();
+                    return;
+                }
+            }
+            g.elements.birds = birds;
         };
         g.start();
     </script>

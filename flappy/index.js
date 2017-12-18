@@ -8,7 +8,7 @@ const globalConfig = {
     fps : 60,
     pipes_stored: 5,
     background: 'black',
-    ay: 0.17,
+    ay: 1.3,
     vx: 10,
     pipe_width: 75,
 }
@@ -47,10 +47,10 @@ class PipePair {
 };
 
 class Bird {
-    constructor(x=200, y=canvas.height/2, size=20) {
+    constructor(x=200, y=canvas.height/2, size=20, color='green') {
         this.alive  = true;
         this.size = size;
-        this.color = 'green';
+        this.color = color;
         this.vx = 10;
         this.vy = 10;
         this.score = 0;
@@ -70,6 +70,7 @@ class Bird {
         context.fillRect(this.x,this.y, this.size, this.size);
     }
     updatePosition ()  {
+        if (! this.alive) return;
         this.vy += globalConfig.ay;
         this.y += this.vy;
         return this;
@@ -77,9 +78,12 @@ class Bird {
 }
 
 class Game {
-    constructor() {
+    constructor(birds=[]) {
+        this.over = false;
         this.interval_id = 0;
-        this.elements = {};
+        this.elements = {
+            birds: birds
+        };
 
         // bind all methods
         this.start = this.start.bind(this);
@@ -90,6 +94,7 @@ class Game {
         this.renderBackground = this.renderBackground.bind(this);
         this.checkCollision = this.checkCollision.bind(this);
         this.updateScore = this.updateScore.bind(this);
+        this.checkGameOver = this.checkGameOver.bind(this);
     }
 
     start () {
@@ -98,7 +103,6 @@ class Game {
     }
 
     initialize ()  {
-        this.elements.bird =  new Bird();
         // first initialize with 5 pipe pairs
         const pipestart = 2*canvas.width/3;
         this.elements.pipes = Array.from(Array(globalConfig.pipes_stored).keys()).map(
@@ -109,15 +113,15 @@ class Game {
     }
 
     update ()  {
-        this.renderElements();
-        this.elements.bird = this.elements.bird.updatePosition(); // get new bird with new position
+        this.elements.birds = this.elements.birds.map((x, i) => x.updatePosition()); // get new bird with new position
         this.elements.pipes = this.elements.pipes.map((x, i) => x.updatePosition());
         this.spawnPipe();
         this.renderElements();
-        if (this.checkCollision()) {
+        this.checkCollision();
+        this.elements.birds = this.elements.birds.filter((x) => x.alive);
+        this.checkGameOver();
+        if (this.over) {
             clearInterval(this.interval_id);
-            globalConfig.game_running = false;
-            return;
         }
         this.updateScore();
     }
@@ -140,8 +144,8 @@ class Game {
         context.clearRect(0,0, globalConfig.width, globalConfig.height);
         this.renderBackground();
 
-        this.elements.bird.render();
         this.elements.pipes.map(x => x.render());
+        this.elements.birds.map(x => x.render());
     }
 
     renderBackground ()  {
@@ -150,27 +154,45 @@ class Game {
     }
 
     checkCollision ()  {
-        if(this.elements.bird.y <=0 || this.elements.bird.y >= globalConfig.height) return true;
-        // check if any of the corner of the bird(rectangle) falls within pipes(check first pipe only)
-        const size = this.elements.bird.size;
-        let corners = [
-            {x: this.elements.bird.x, y:this.elements.bird.y},
-            {x: this.elements.bird.x+size, y:this.elements.bird.y+size},
-            {x: this.elements.bird.x, y:this.elements.bird.y+size},
-            {x: this.elements.bird.x+size, y:this.elements.bird.y},
-        ]
-        // get first pipe
-        const pipe = this.elements.pipes[0];
-        for(let x=0;x<corners.length;x++) {
-            if(corners[x].x >= pipe.x && corners[x].x <= pipe.x + globalConfig.pipe_width) {
-                if (corners[x].y >= 0 && corners[x].y <= pipe.top_height) return true;
-                if (corners[x].y >= pipe.bottom_height && corners[x].y <= globalConfig.height) return true;
+        for(let y in this.elements.birds) {
+            let bird = this.elements.birds[y];
+            let alive = true;
+            if(bird.y <=0 || bird.y >= canvas.height) {
+                console.log('outside');
+                this.elements.birds[y].alive = false;
+                continue;
+            }
+            // check if any of the corner of the bird(rectangle) falls within pipes(check first pipe only)
+            const size = bird.size;
+            let corners = [
+                {x: bird.x, y:bird.y},
+                {x: bird.x+size, y:bird.y+size},
+                {x: bird.x, y:bird.y+size},
+                {x: bird.x+size, y:bird.y},
+            ]
+            // get first pipe
+            const pipe = this.elements.pipes[0];
+            for(let x=0;x<corners.length;x++) {
+                if(corners[x].x >= pipe.x && corners[x].x <= pipe.x + globalConfig.pipe_width) {
+                    if (corners[x].y >= 0 && corners[x].y <= pipe.top_height) {
+                        console.log('collide');
+                        this.elements.birds[y].alive = false;
+                        console.log(this.elements.birds);
+                        break;
+                    }
+                    else if (corners[x].y >= pipe.bottom_height && corners[x].y <= canvas.height){
+                        console.log('collide');
+                        this.elements.birds[y].alive = false;
+                        console.log(this.elements.birds);
+                        break;
+                    }
+                }
             }
         }
-        return false;
     }
 
-    updateScore ()  {
+    updateScore () {
+        return;
         if(this.elements.bird.x > (this.elements.pipes[0].x_pos + globalConfig.pipe_width)) {
             if(globalConfig.scoreUpdate) {
                 globalConfig.score += 1;
@@ -178,5 +200,12 @@ class Game {
                 globalConfig.scoreUpdate = false;
             }
         }
+    }
+
+    checkGameOver() {
+        this.over = this.elements.birds.reduce(
+            (a, e) => a & e,
+            true
+        );
     }
 }
