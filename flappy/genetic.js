@@ -6,7 +6,7 @@ class GeneticAlgo {
         this.maxScore = 0;
         this.fittest = null;
 
-        this.currentPopulation = new Population(5);
+        this.currentPopulation = new Population(6);
 
         this.run = this.run.bind(this);
         this.shouldStop = this.shouldStop.bind(this);
@@ -76,18 +76,18 @@ class Population {
         const fittest2 = this.getNextFittest(); // elite
 
         // get n/2  crossedovers and the remaining mutated
-        const halfpop = parseInt(this.size/2);
+        const halfpop = Math.ceil(this.size/2) - 1;
         const crossedovers = Array.from(Array(halfpop)).reduce(
             (a, e) => [...a, ...fittest.crossOver(fittest2)], // crossover will take place at random places
             []
         );
-        const elite_crossedovers= [fittest, fittest2, ...crossedovers];
+        const elite_crossedovers = [fittest, fittest2, ...crossedovers];
         // now mutate each of the crossedovers
         const mutated = elite_crossedovers.map(x => x.mutate());
 
         const num_mutated = this.size - this.elite_crossedovers;
         const individuals = [...elite_crossedovers, ...mutated.splice(0, num_mutated)]
-        return Population(0, individuals);
+        return new Population(0, individuals);
     }
 }
 
@@ -96,7 +96,7 @@ class Individual {
     constructor(chromosome_len, chromosome) {
         this.chromosomeLength = chromosome_len;
         // gene of 0s and 1s
-        if(!gene) {
+        if(!chromosome) {
             this.chromosome= Array.from(Array(chromosome_len)).map(x => Math.round(Math.random()));
         }
         else {
@@ -112,11 +112,17 @@ class Individual {
     crossOver(other_individual) {
         // get random crossover point
         const point = parseInt(Math.random()*this.chromosomeLength*3/4);
-        const newIndividual = new Individual(this.chromosomeLength, this.chromosome);
+
+        const new1 = new Individual(this.chromosomeLength, this.chromosome);
+        const new2 = new Individual(this.chromosomeLength, other_individual.chromosome);
+
         for(let x=0;x<point;x++) {
-            newIndividual.chromosome[x] = other_individual.chromosome[x];
+            new1.chromosome[x] = other_individual.chromosome[x];
         }
-        return newIndividual;
+        for(let x=point;x<this.chromosomeLength;x++) {
+            new2.chromosome[x] = this.chromosome[x];
+        }
+        return [new1, new2];
     }
 
     mutate() {
