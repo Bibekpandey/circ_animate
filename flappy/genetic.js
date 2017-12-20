@@ -42,12 +42,13 @@ class GeneticAlgo {
 
 class Population {
     constructor(config = {}) {
-        this.size = config.size || 5;
+        this.size = config.size || 0;
         if (this.size<=0) {
             this.individuals = config.individuals || [];
             this.size = this.individuals.length;
         }
         else {
+            this.size = config.size || 5;
             const genlen = config.gene_length || 5;
             this.individuals = Array.from(Array(this.size)).map(x=> new Individual(genlen));
         }
@@ -88,7 +89,7 @@ class Population {
 
         const num_mutated = this.size - this.elite_crossedovers;
         const individuals = [...elite_crossedovers, ...mutated.splice(0, num_mutated)]
-        return new Population(0, individuals);
+        return new Population({individuals:individuals});
     }
 }
 

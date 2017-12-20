@@ -156,7 +156,7 @@ class Game {
         //this.checkCollision = this.checkCollision.bind(this);
         this.updateScore = this.updateScore.bind(this);
         this.checkGameOver = this.checkGameOver.bind(this);
-        this.getBirds = this.checkGameOver.bind(this);
+        this.getBirds = this.getBirds.bind(this);
     }
 
     getBirds () {
@@ -185,9 +185,9 @@ class Game {
         this.spawnPipe();
         this.renderElements();
         this.elements.birds = this.elements.birds.map((x, i) => x.checkCollision(this.elements.pipes));
-        this.checkGameOver();
-        if (this.over) {
+        if (this.checkGameOver()) {
             clearInterval(this.interval_id);
+            rerunSimulation(this.elements.birds);
         }
         this.updateScore();
         this.counter +=1;
@@ -262,9 +262,9 @@ class Game {
     }
 
     checkGameOver() {
-        this.over = this.elements.birds.reduce(
-            (a, e) => a & e,
-            true
-        );
+        for(let x in this.elements.birds) {
+            if(this.elements.birds[x].alive) return false;
+        }
+        return true;
     }
 }

@@ -3,10 +3,23 @@
         <title>
             Flappyyy
         </title>
+        <script>
+            function rerunSimulation(individuals) {
+                let population = new Population({individuals:individuals});
+                population = population.nextGeneration();
+                const g = new Game(population.individuals, true);
+                GENERATION += 1;
+                document.getElementById('generation').innerHTML = GENERATION;
+                g.start();
+            }
+        </script>
     </head>
     <body>
         <div style="float:left">
             <canvas id="flappy" width=1000 height=600"></canvas>
+        </div>
+        <div>
+            <h2> Generation <span id="generation">1</span></h2>
         </div>
         <div id="scores" style="float:left;margin:auto">
         </div>
@@ -16,13 +29,14 @@
     <script src="elements.js"></script>
     <script>
         const INDIVIDUALS =  20;
+        let GENERATION = 1;
         let scoreboard = document.getElementById('scores');
         for (let x=0;x<INDIVIDUALS;x++) {
             scoreboard.innerHTML += '<div><b>Individual '+x+ ': </b>'+ '<span id="bird'+x+'score">0</span>';
         }
         const birds = Array.from(Array(INDIVIDUALS)).map(x=> new Individual());
 
-        const population = new Population(birds);
+        const population = new Population({individuals:birds});
 
         var g = new Game(birds, true);
 
