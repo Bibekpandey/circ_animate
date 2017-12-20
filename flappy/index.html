@@ -8,21 +8,19 @@
         <div style="float:left">
             <canvas id="flappy" width=1000 height=600"></canvas>
         </div>
-        <div style="float:left;margin:auto">
-            <b> SCORE: </b>&nbsp;<span id="score">0</span>
+        <div id="scores" style="float:left;margin:auto">
         </div>
     </body>
     <script src="index.js"></script>
     <script src="genetic.js"></script>
     <script src="elements.js"></script>
     <script>
-        // create birds
-
-        function getBird(birdClass) {
-            return new birdClass();
+        const INDIVIDUALS =  20;
+        let scoreboard = document.getElementById('scores');
+        for (let x=0;x<INDIVIDUALS;x++) {
+            scoreboard.innerHTML += '<div><b>Individual '+x+ ': </b>'+ '<span id="bird'+x+'score">0</span>';
         }
-
-        const birds = Array.from(Array(5)).map(x=> new Individual());
+        const birds = Array.from(Array(INDIVIDUALS)).map(x=> new Individual());
 
         const population = new Population(birds);
 

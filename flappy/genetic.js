@@ -96,10 +96,10 @@ class Population {
 class Individual extends Bird {
     constructor(chromosome_len, chromosome) {
         super();
-        this.length = chromosome_len || 10;
+        this.length = chromosome_len || 20;
         // gene of 0s and 1s
         if(!chromosome) {
-            this.chromosome= Array.from(Array(chromosome_len)).map(x => Math.random()>0.8? 1: 0);
+            this.chromosome= Array.from(Array(this.length)).map(x => Math.random()>0.5? 1: 0);
         }
         else {
             this.chromosome = chromosome;

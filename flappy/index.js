@@ -47,14 +47,16 @@ class PipePair {
     }
 };
 
+const colors = ["orange", "skyblue", "maroon", "green", "lightgreen", "blue", "teal", "brown"];
+
 class Bird {
     constructor(config={}) {
         this.chromosome = config.chromosome || {};
         this.alive  = true;
         this.size = config.size || 20;
-        this.color = config.color || 'green';
+        this.color = config.color || colors[Math.round(Math.random()*colors.length)];
         this.vx = 10;
-        this.vy = config.vy || 0;
+        this.vy = config.vy || Math.random()*15;
         this.score = 0;
         this.scoreUpdate = true;
         this.x = config.x || 200;
@@ -62,13 +64,6 @@ class Bird {
     }
     render()  {
         context.fillStyle = this.color;
-        /*context.drawImage(*/
-            //elements.bird.img,
-            //elements.bird.x,
-            //elements.bird.y,
-            //globals.bird_size*1.33,
-            //globals.bird_size
-        /*)*/
         context.fillRect(this.x,this.y, this.size, this.size);
     }
 
@@ -80,11 +75,11 @@ class Bird {
         const max_vert_diff =  canvas.height;
 
         const unit = max_horz_diff/this.chromosome.length;
-        let gene = parseInt(this.x/unit);
+        let gene = parseInt(dx/unit);
         gene = gene < 0 ? 0: gene;
         gene = gene >= this.chromosome.length ? this.chromosome.length-1 : gene;
+        //console.log(this.x.toString() + " "+ unit.toString() + " " + max_horz_diff + " " + gene);
         // find which chromosome does dx dy relate to
-        if (this.vy < 0) return this.vy;
         return this.chromosome[gene] == 1 ? -globalConfig.jump_velocity:this.vy;
     }
 
@@ -133,6 +128,13 @@ class Bird {
         this.alive = true;
         return this;
     }
+    updateScore (ind) {
+        if (this.alive) {
+            this.score += 1;
+            document.getElementById('bird'+ind+'score').innerHTML = this.score;
+        }
+        return this;
+    }
 }
 
 class Game {
@@ -168,6 +170,7 @@ class Game {
 
     initialize ()  {
         // first initialize with 5 pipe pairs
+        this.counter = 0;
         const pipestart = 2*canvas.width/3;
         this.elements.pipes = Array.from(Array(globalConfig.pipes_stored).keys()).map(
             (x, i) => {
@@ -187,6 +190,7 @@ class Game {
             clearInterval(this.interval_id);
         }
         this.updateScore();
+        this.counter +=1;
     }
 
     spawnPipe ()  {
@@ -240,7 +244,6 @@ class Game {
                     if (corners[x].y >= 0 && corners[x].y <= pipe.top_height) {
                         console.log('collide');
                         this.elements.birds[y].alive = false;
-                        console.log(this.elements.birds);
                         break;
                     }
                     else if (corners[x].y >= pipe.bottom_height && corners[x].y <= canvas.height){
@@ -255,14 +258,7 @@ class Game {
     }
 
     updateScore () {
-        return;
-        if(this.elements.bird.x > (this.elements.pipes[0].x_pos + globalConfig.pipe_width)) {
-            if(globalConfig.scoreUpdate) {
-                globalConfig.score += 1;
-                scoreElem.innerHTML = globalConfig.score;
-                globalConfig.scoreUpdate = false;
-            }
-        }
+        this.elements.birds = this.elements.birds.map((x, i) => x.updateScore(i));
     }
 
     checkGameOver() {
