@@ -11,6 +11,7 @@ const globalConfig = {
     ay: 1.3,
     vx: 10,
     pipe_width: 75,
+    jump_velocity: 15,
 }
 
 class PipePair {
@@ -47,16 +48,17 @@ class PipePair {
 };
 
 class Bird {
-    constructor(x=200, y=canvas.height/2, size=20, color='green') {
+    constructor(config={}) {
+        this.chromosome = config.chromosome || {};
         this.alive  = true;
-        this.size = size;
-        this.color = color;
+        this.size = config.size || 20;
+        this.color = config.color || 'green';
         this.vx = 10;
-        this.vy = 10;
+        this.vy = config.vy || 0;
         this.score = 0;
         this.scoreUpdate = true;
-        this.x = x;
-        this.y = y;
+        this.x = config.x || 200;
+        this.y = config.y || canvas.height/2;
     }
     render()  {
         context.fillStyle = this.color;
@@ -69,16 +71,73 @@ class Bird {
         /*)*/
         context.fillRect(this.x,this.y, this.size, this.size);
     }
-    updatePosition ()  {
-        if (! this.alive) return;
+
+    decideJump(pipes) {
+        // get dx with first pipe
+        const dx = pipes[0].x - (this.x + this.size);
+        const dy = pipes[0].top_height - this.height;
+        const max_horz_diff =  globalConfig.horizontal_spacing;
+        const max_vert_diff =  canvas.height;
+
+        const unit = max_horz_diff/this.chromosome.length;
+        let gene = parseInt(this.x/unit);
+        gene = gene < 0 ? 0: gene;
+        gene = gene >= this.chromosome.length ? this.chromosome.length-1 : gene;
+        // find which chromosome does dx dy relate to
+        if (this.vy < 0) return this.vy;
+        return this.chromosome[gene] == 1 ? -globalConfig.jump_velocity:this.vy;
+    }
+
+    updatePosition (auto, pipes)  {
+        if (! this.alive) {
+            // move it outside the screen
+            this.y = 0;
+            this.color='grey';
+            return this;
+        }
+        if (auto) {
+            this.vy = this.decideJump(pipes);
+        }
         this.vy += globalConfig.ay;
         this.y += this.vy;
+        return this;
+    }
+
+    checkCollision (pipes)  {
+        if(this.y <=0 || this.y >= canvas.height) {
+            this.alive = false;
+            return this;
+        }
+        // check if any of the corner of the bird(rectangle) falls within pipes(check first pipe only)
+        const size = this.size;
+        let corners = [
+            {x: this.x, y:this.y},
+            {x: this.x+size, y:this.y+size},
+            {x: this.x, y:this.y+size},
+            {x: this.x+size, y:this.y},
+        ]
+        // get first pipe
+        const pipe = pipes[0];
+        for(let x=0;x<corners.length;x++) {
+            if(corners[x].x >= pipe.x && corners[x].x <= pipe.x + globalConfig.pipe_width) {
+                if (corners[x].y >= 0 && corners[x].y <= pipe.top_height) {
+                    this.alive = false;
+                    return this;
+                }
+                else if (corners[x].y >= pipe.bottom_height && corners[x].y <= canvas.height){
+                    this.alive = false;
+                    return this;
+                }
+            }
+        }
+        this.alive = true;
         return this;
     }
 }
 
 class Game {
-    constructor(birds=[]) {
+    constructor(birds=[], autoplay=false) {
+        this.autoplay = autoplay;
         this.over = false;
         this.interval_id = 0;
         this.elements = {
@@ -92,9 +151,14 @@ class Game {
         this.spawnPipe = this.spawnPipe.bind(this);
         this.renderElements = this.renderElements.bind(this);
         this.renderBackground = this.renderBackground.bind(this);
-        this.checkCollision = this.checkCollision.bind(this);
+        //this.checkCollision = this.checkCollision.bind(this);
         this.updateScore = this.updateScore.bind(this);
         this.checkGameOver = this.checkGameOver.bind(this);
+        this.getBirds = this.checkGameOver.bind(this);
+    }
+
+    getBirds () {
+        return this.elements.birds;
     }
 
     start () {
@@ -113,12 +177,11 @@ class Game {
     }
 
     update ()  {
-        this.elements.birds = this.elements.birds.map((x, i) => x.updatePosition()); // get new bird with new position
+        this.elements.birds = this.elements.birds.map((x, i) => x.updatePosition(this.autoplay, this.elements.pipes)); // get new bird with new position
         this.elements.pipes = this.elements.pipes.map((x, i) => x.updatePosition());
         this.spawnPipe();
         this.renderElements();
-        this.checkCollision();
-        this.elements.birds = this.elements.birds.filter((x) => x.alive);
+        this.elements.birds = this.elements.birds.map((x, i) => x.checkCollision(this.elements.pipes));
         this.checkGameOver();
         if (this.over) {
             clearInterval(this.interval_id);

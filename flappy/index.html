@@ -14,17 +14,19 @@
     </body>
     <script src="index.js"></script>
     <script src="genetic.js"></script>
+    <script src="elements.js"></script>
     <script>
         // create birds
 
-        function getBirds() {
-            const birds =  [new Bird(), new Bird()];
-            birds[1].color = 'yellow';
-            birds[1].vy = 4;
-            return birds;
+        function getBird(birdClass) {
+            return new birdClass();
         }
 
-        var g = new Game(getBirds());
+        const birds = Array.from(Array(5)).map(x=> new Individual());
+
+        const population = new Population(birds);
+
+        var g = new Game(birds, true);
 
         document.onkeypress = (e) => {
             var charcode = e.charCode;

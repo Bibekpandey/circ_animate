@@ -41,14 +41,15 @@ class GeneticAlgo {
 
 
 class Population {
-    constructor(size=0, individuals=[], gene_length=50) {
-        if (size<=0) {
-            this.individuals = individuals;
+    constructor(config = {}) {
+        this.size = config.size || 5;
+        if (this.size<=0) {
+            this.individuals = config.individuals || [];
             this.size = this.individuals.length;
         }
         else {
-            this.size = size;
-            this.individuals = Array.from(Array(size)).map(x=> new Individual(gene_length));
+            const genlen = config.gene_length || 5;
+            this.individuals = Array.from(Array(this.size)).map(x=> new Individual(genlen));
         }
 
         // bind methods
@@ -92,18 +93,20 @@ class Population {
 }
 
 
-class Individual {
+class Individual extends Bird {
     constructor(chromosome_len, chromosome) {
-        this.chromosomeLength = chromosome_len;
+        super();
+        this.length = chromosome_len || 10;
         // gene of 0s and 1s
         if(!chromosome) {
-            this.chromosome= Array.from(Array(chromosome_len)).map(x => Math.round(Math.random()));
+            this.chromosome= Array.from(Array(chromosome_len)).map(x => Math.random()>0.8? 1: 0);
         }
         else {
             this.chromosome = chromosome;
-            this.chromosomeLength = chromosome.length;
+            this.length = chromosome.length;
         }
         this.score = 0;
+
 
         this.crossOver = this.crossOver.bind(this);
         this.mutate = this.mutate.bind(this);
@@ -111,15 +114,15 @@ class Individual {
 
     crossOver(other_individual) {
         // get random crossover point
-        const point = parseInt(Math.random()*this.chromosomeLength*3/4);
+        const point = parseInt(Math.random()*this.length*3/4);
 
-        const new1 = new Individual(this.chromosomeLength, this.chromosome);
-        const new2 = new Individual(this.chromosomeLength, other_individual.chromosome);
+        const new1 = new Individual(this.length, this.chromosome);
+        const new2 = new Individual(this.length, other_individual.chromosome);
 
         for(let x=0;x<point;x++) {
             new1.chromosome[x] = other_individual.chromosome[x];
         }
-        for(let x=point;x<this.chromosomeLength;x++) {
+        for(let x=point;x<this.length;x++) {
             new2.chromosome[x] = this.chromosome[x];
         }
         return [new1, new2];
@@ -127,7 +130,7 @@ class Individual {
 
     mutate() {
         // mutate with 20% probability of flipping gene
-        const newInd = new Individual(this.chromosomeLength, this.chromosome);
+        const newInd = new Individual(this.length, this.chromosome);
         for(let x in newInd.chromosome) {
             newInd.chromosome[x] = Math.random() < 0.2 ? !newInd.chromosome[x]: newInd.chromosome[x];
         }
