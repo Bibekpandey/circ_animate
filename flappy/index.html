@@ -7,10 +7,17 @@
             function rerunSimulation(individuals) {
                 let population = new Population({individuals:individuals});
                 population = population.nextGeneration();
-                const g = new Game(population.individuals, true);
+                const g = new Game(population.individuals.map(x=>{
+                    x.score=0;
+                    x.alive=true;
+                    x.y= (new Bird()).y;
+                    console.log(x.chromosome);
+                    return x}),
+                    true);
                 GENERATION += 1;
                 document.getElementById('generation').innerHTML = GENERATION;
                 g.start();
+                console.log('..................');
             }
         </script>
     </head>
@@ -28,7 +35,7 @@
     <script src="genetic.js"></script>
     <script src="elements.js"></script>
     <script>
-        const INDIVIDUALS =  20;
+        const INDIVIDUALS =  4;
         let GENERATION = 1;
         let scoreboard = document.getElementById('scores');
         for (let x=0;x<INDIVIDUALS;x++) {

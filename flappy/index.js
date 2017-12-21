@@ -49,6 +49,19 @@ class PipePair {
 
 const colors = ["orange", "skyblue", "maroon", "green", "lightgreen", "blue", "teal", "brown"];
 
+function getIndex(curr_x, target_x, curr_y, target_y, max_w, max_h, chromolen) {
+    const dx = target_x - curr_x;
+    const dy = target_y - curr_y;
+    const max_horz_diff =  globalConfig.horizontal_spacing;
+    const max_vert_diff =  canvas.height;
+
+    const unit = max_w/chromolen;
+    let gene = parseInt(dx/unit);
+    gene = gene < 0 ? 0: gene;
+    gene = gene >= chromolen ? chromolen-1 : gene;
+    return gene;
+}
+
 class Bird {
     constructor(config={}) {
         this.chromosome = config.chromosome || {};
@@ -56,7 +69,7 @@ class Bird {
         this.size = config.size || 20;
         this.color = config.color || colors[Math.round(Math.random()*colors.length)];
         this.vx = 10;
-        this.vy = config.vy || Math.random()*15;
+        this.vy = config.vy || 0;//Math.random()*15;
         this.score = 0;
         this.scoreUpdate = true;
         this.x = config.x || 200;
@@ -74,12 +87,16 @@ class Bird {
         const max_horz_diff =  globalConfig.horizontal_spacing;
         const max_vert_diff =  canvas.height;
 
-        const unit = max_horz_diff/this.chromosome.length;
-        let gene = parseInt(dx/unit);
-        gene = gene < 0 ? 0: gene;
-        gene = gene >= this.chromosome.length ? this.chromosome.length-1 : gene;
-        //console.log(this.x.toString() + " "+ unit.toString() + " " + max_horz_diff + " " + gene);
-        // find which chromosome does dx dy relate to
+        const gene = getIndex(
+            this.x + this.size,
+            pipes[0].x,
+            this.y,
+            pipes[0].top_height,
+            globalConfig.horizontal_spacing,
+            canvas.height,
+            this.chromosome.length
+        );
+
         return this.chromosome[gene] == 1 ? -globalConfig.jump_velocity:this.vy;
     }
 

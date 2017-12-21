@@ -60,10 +60,11 @@ class Population {
     }
 
     getFittest() {
-        return this.individuals.reduce(
+        const fittest = this.individuals.reduce(
             (a, e) => e.score > a.score ? e:a,
             this.individuals[0]
-        )
+        );
+        return fittest;
     }
 
     getNextFittest() {
@@ -97,7 +98,7 @@ class Population {
 class Individual extends Bird {
     constructor(chromosome_len, chromosome) {
         super();
-        this.length = chromosome_len || 20;
+        this.length = chromosome_len || 10;
         // gene of 0s and 1s
         if(!chromosome) {
             this.chromosome= Array.from(Array(this.length)).map(x => Math.random()>0.5? 1: 0);
@@ -135,5 +136,6 @@ class Individual extends Bird {
         for(let x in newInd.chromosome) {
             newInd.chromosome[x] = Math.random() < 0.2 ? !newInd.chromosome[x]: newInd.chromosome[x];
         }
+        return newInd;
     }
 }
