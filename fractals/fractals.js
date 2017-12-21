@@ -24,5 +24,5 @@ function getRule() {
 
 function drawPoint(x, y, color) {
     g_context.fillStyle = color;
-    g_context.fillRect(x*50, y*50, 0.5, 0.5);
+    g_context.fillRect(x*50, y*50, .5, .5);
 }
