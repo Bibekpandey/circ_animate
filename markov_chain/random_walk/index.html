@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <title>Random Walk</title>
+    </head>
+    <body>
+        <canvas id="mycanvas" height="600" width="600" style="border:solid 2px"></canvas>
+    </body>
+    <script>
+        var g_canvas = document.getElementById('mycanvas');
+        var g_ctx = g_canvas.getContext('2d');
+        g_ctx.translate(g_canvas.width/2, g_canvas.height/2);
+    </script>
+    <script src="random_walk.js"></script>
+    <script>
+        const random_walk = new RandomWalk();
+        random_walk.start(g_ctx);
+    </script>
+    <script>
+    </script>
+</html>
