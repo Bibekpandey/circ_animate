@@ -74,6 +74,11 @@ class DrawHandler {
         this.ctx.lineTo(to.x, to.y);
         this.ctx.stroke();
     }
+
+    download(a_elem) {
+        let dt = this.canvas.toDataURL('image/jpeg');
+        a_elem.href = dt;
+    }
 }
 
 function translatePoint(point, dx, dy) {
