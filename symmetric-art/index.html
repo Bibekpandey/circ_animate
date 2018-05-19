@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <title>
+            Symmetric Art
+        </title>
+        <script type="text/javascript" src="art.js"></script>
+        <script>
+            var colors = [
+                "white", "blue", "red", "darkgreen", "purple", "yellow",
+                "pink", "maroon", "cyan", "violet", "teal"
+            ];
+            function initialize() {
+                // first create colors
+                const table = document.getElementById("color-picker");
+                const color_cols = 5;
+                var tableHtml = "";
+                for(let x=0;x<colors.length;x++) {
+                    if (x%color_cols === 0) {
+                        tableHtml += "<tr>"
+                    }
+                    tableHtml += '<td class="colorbox" id="'+colors[x]+'" style="cursor:pointer;border:solid 1px; background-color:'+
+                            colors[x]+';padding:3px;" onclick="changeColor(this)">&nbsp;&nbsp;&nbsp;&nbsp;</td>';
+                    if (x%color_cols === color_cols -1) {
+                        tableHtml += "</tr>";
+                    }
+                }
+                table.innerHTML = tableHtml;
+            }
+
+            function changeColor(elem) {
+                if (g_drawHandler) {
+                    g_drawHandler.setColor(elem.id);
+                }
+                // first unset border
+                let colors = document.getElementsByClassName('colorbox');
+                for (let x=0;x<colors.length;x++) {
+                    colors[x].style.borderWidth="1px";
+                    colors[x].style.padding ="3px";
+                }
+                elem.style.padding="1px";
+                elem.style.borderWidth="3px";
+            }
+
+            function changeWidth(elem) {
+                if (g_drawHandler) {
+                    g_drawHandler.setSize(parseInt(elem.value));
+                }
+                console.log('here');
+                document.getElementById('strokeSize').innerHTML = elem.value;
+            }
+            function changeSymmetries(elem) {
+                if (g_drawHandler) {
+                    g_drawHandler = new DrawHandler(canvas, parseInt(elem.value));
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div style="float:left">
+            <canvas id="mycanvas" width=1000 height=600 style="border:solid 1px"></canvas>
+        </div>
+        <div style="float:left">
+            <h3>Choose Color</h3>
+            <table id="color-picker">
+            </table>
+            <h3>Brush Width</h3>
+            <input type="range" min="1" max="6" value="1" autocomplete="off" id="strokeSizeRange" onchange="changeWidth(this)">
+            <label id="strokeSize"> 1 </label>
+            <h3>Symmetries</h3>
+            <input id="symmetry-input" style="height:20px;width:100px" autocomplete="off" type="number" value="10" max="50"  onchange="changeSymmetries(this)"/>
+            <span style="font-size:0.6em;color:red">Changing this will reset the canvas. And setting very high value will freeze your computer</span>
+        </div>
+    </body>
+    <script>
+        initialize();
+        var canvas = document.getElementById('mycanvas');
+        var symmetries = document.getElementById('symmetry-input').value;
+        let g_drawHandler = new DrawHandler(canvas, parseInt(symmetries));
+        canvas.addEventListener("mousemove", (e) => g_drawHandler.handleMouseMove(e), false);
+        canvas.addEventListener("mousedown", (e) => g_drawHandler.handleMouseDown(e), false);
+        canvas.addEventListener("mouseup", (e) => g_drawHandler.handleMouseUp(e), false);
+        canvas.addEventListener("mouseout", (e) => g_drawHandler.handleMouseOut(e), false);
+    </script>
+</html>
