@@ -57,7 +57,7 @@
     </head>
     <body>
         <div style="float:left">
-            <canvas id="mycanvas" width=1000 height=600 style="border:solid 1px"></canvas>
+            <canvas id="mycanvas" width=1200 height=700 style="border:solid 1px"></canvas>
         </div>
         <div style="float:left">
             <h3>Choose Color</h3>
@@ -83,5 +83,6 @@
         canvas.addEventListener("mousedown", (e) => g_drawHandler.handleMouseDown(e), false);
         canvas.addEventListener("mouseup", (e) => g_drawHandler.handleMouseUp(e), false);
         canvas.addEventListener("mouseout", (e) => g_drawHandler.handleMouseOut(e), false);
+        canvas.addEventListener("click", (e) => g_drawHandler.handleMouseClick(e), false);
     </script>
 </html>

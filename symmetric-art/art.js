@@ -17,6 +17,7 @@ class DrawHandler {
         // TODO: draw a dot on the center
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+        this.dragStart = null;  // this is used not to draw a point at the end of drawing
     }
 
     setColor(color) {
@@ -34,10 +35,23 @@ class DrawHandler {
         };
     }
 
+    handleMouseClick(e) {
+        const pos = this.getMousePos(e);
+        if (pos.x !== this.dragStart.x | pos.y !== this.dragStart.y) return;
+        this.ctx.strokeStyle = this.color;
+        this.ctx.fillStyle = this.color;
+        for(let x=0; x<this.symmetries;x++) {
+            let newpt = rotateAbout(pos, x*this.dTheta, this.center);
+            this.drawPoint(newpt);
+        }
+        
+    }
+
     handleMouseDown(e) {
         this.state = DRAWING;
         // get position
         this.currentPos = this.getMousePos(e);
+        this.dragStart = this.currentPos;
     }
 
     handleMouseUp(e) {
@@ -65,6 +79,12 @@ class DrawHandler {
             let newto = rotateAbout(to, x*this.dTheta, this.center);
             this.drawLine(newfrom, newto);
         }
+    }
+
+    drawPoint(point) {
+        this.ctx.beginPath();
+        this.ctx.arc(point.x, point.y, this.strokeSize, 0, 2 * Math.PI);
+        this.ctx.fill();
     }
 
     drawLine(from, to) {
