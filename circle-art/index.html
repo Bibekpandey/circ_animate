@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <title>Circular Circle Art</title>
+        <script type="text/javascript" src="index.js"></script>
+        <style>
+        </style>
+    </head>
+
+    <body>
+        <a href="https://bewakes.com">&lt;&lt;Home</a><br><br>
+        <div id="tiles-container">
+            <canvas id="dots" height=800 width=800></canvas>
+        </div>
+    </body>
+
+    <script>
+        const canvas = document.getElementById('dots');
+        const W = canvas.width;
+        const H = canvas.height;
+        const ctx = canvas.getContext('2d');
+        const translator = new Translator(W, H);
+
+        const numrings = randRange(30);
+        const colors = ['DarkKhaki', 'Turquoise', 'Gold', 'Salmon', 'HotPink', 'Navy', 'YellowGreen', 'RebeccaPurple', 'PeachPuff', 'DarkCyan', 'Moccasin', 'Purple', 'Gainsboro', 'Red', 'Lavender', 'Yellow', 'DimGray', 'DarkGoldenRod', 'OliveDrab', 'LightSlateGrey', 'PaleGoldenRod', 'Pink', 'LimeGreen', 'DarkGray', 'Bisque', 'DarkSalmon', 'OldLace', 'Beige', 'HoneyDew', 'SlateBlue'];
+        const lencolors = colors.length;
+
+        function randRange(e=100, s=0) {
+            if (e < s) {
+                // swap
+                e = e + s; s = e - s; e = e - s;
+            }
+            return rand = s + parseInt(Math.random()*(e-s));
+        }
+        const randcolor = () => colors[randRange(lencolors)];
+
+        function run() {
+            // Fill black
+            ctx.beginPath();
+            ctx.rect(0, 0, W, H);
+            ctx.fillStyle = "black";
+            ctx.fill();
+
+            let ring = new Ring(randRange(10, 40), randRange(10, 30), randcolor());
+
+            // create rings
+            const rings = [...Array(numrings)].reduce((a, x) => {
+                let len = a.length;
+                return [...a, a[len-1].next(randRange(15, 30), randcolor())];
+            }, [ring]);
+
+            const circles = rings.reduce((a, x) => {
+                const newa = [...a, ...x.getCircles()];
+                return newa;
+            }, []);
+
+            // render circles
+            circles.map((x) => x.render(ctx, translator));
+            circles.map((x) => {
+                const rand = Math.random();
+                if (rand > 0.6) {
+                    x.bulge(ctx, translator)
+                }
+                else if (rand > 0.3) {
+                    x.vibrate(ctx, translator);
+                }
+            });
+            // window.setTimeout(run, 600);
+        }
+        run();
+
+
+        
+    </script>
+</html>
+
