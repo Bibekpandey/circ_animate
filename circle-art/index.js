@@ -45,30 +45,30 @@ class Circle extends Renderable {
         ctx.closePath();
     }
 
-    vibrate(ctx, translator, amplitude = 2, speed = 10 /* pixels per frame */, fps = 60) {
+    vibrate(ctx, translator, amplitude = 2, speed = 0.1 /* pixels per frame */, fps = 60) {
         const direction = 2 * Math.PI * Math.random();
         // generate animation function with time as parameter
         const f = (t) => {
             this.clear(ctx, translator);
-            let displacement = amplitude * Math.sin(t*speed/fps);
+            let displacement = amplitude * Math.sin(t*speed);
             const dx = displacement * Math.cos(direction);
             const dy = displacement * Math.sin(direction);
             this.state.x = this.posx + dx;
             this.state.y = this.posy + dy;
             this.render(ctx, translator);
-            window.setTimeout(() => f(t+fps), fps); 
+            window.setTimeout(() => f(t+1), 1000/fps); 
         }
         f(0);
     }
 
-    bulge (ctx, translator, speed = 1, fps = 60) {
-        const amplitude = this.radius * 0.05; // 10% of the radius
+    bulge (ctx, translator, speed = 0.1, fps = 60) {
+        const amplitude = this.radius * 0.03; // 3% of the radius
         const f = (t) => {
             this.clear(ctx, translator);
-            let dr = amplitude * Math.sin(t*speed/fps);
+            let dr = amplitude * Math.sin(t*speed);
             this.state.radius = this.radius + dr;
             this.render(ctx, translator);
-            window.setTimeout(() => f(t+fps), fps);
+            window.setTimeout(() => f(t+1), 1000/fps);
         }
         f(0)
     }
