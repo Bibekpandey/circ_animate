@@ -12,12 +12,20 @@
     <script src="index.js"></script>
     <script>
         // fill canvas with black
+        const scene = new Scene(ctx, createParticles(ctx, 25, 5));
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const particle = new Particle(ctx);
+        canvas.onmousemove = (ev) => { 
+            const mousex = ev.pageX - canvas.offsetLeft;
+            const mousey = ev.pageY - canvas.offsetTop;
+            const newCoord = {
+                x: mousex - canvas.width/2,
+                y: canvas.height/2 - mousey
+            };
+            scene.mousePos = {x: mousex, y: mousey};
+        };
 
-        const scene = new Scene(ctx, createParticles(ctx, 15, 5));
         scene.animate();
     </script>
 </html>

@@ -14,6 +14,8 @@ class Scene {
         this.elements = elems;
         this.ctx = ctx;
         this.render = () => { this.elements.map(x => x.render()) };
+        this.mousePos = {x:-1 , y:-1};
+        this.mouseRad = 40;
 
         this.update = this.update.bind(this);
         this.animate = this.animate.bind(this);
@@ -39,6 +41,12 @@ class Scene {
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
         this.elements.map((x) => x.render());
+        // render mousePos
+        this.ctx.fillStyle = 'black';
+        this.ctx.beginPath();
+        this.ctx.arc(this.mousePos.x,this.mousePos.y,this.mouseRad,0,2*Math.PI);
+        this.ctx.fill();
+        this.ctx.stroke();
         window.setTimeout(this.animate, 1000/30);
     }
 }
@@ -54,8 +62,8 @@ class Particle {
             lastPositions: [], // History of positions
         };
         this.state.position = {
-            x: this.state.position.x + Math.random() * 2,
-            y: this.state.position.y + Math.random() * 2,
+            x: this.state.position.x + Math.random() * 0.8,
+            y: this.state.position.y + Math.random() * 0.8,
         }
 
         this.oscillateDir = Math.random() * Math.PI * 2; // It's original direction
@@ -147,7 +155,7 @@ const vecToAngle = ({x, y}) => {
 
 function createParticles(ctx, X, Y) {
     // create from -x to +x and -y to +y
-    const offset = 20;
+    const offset = 7;
 
     let props;
 
