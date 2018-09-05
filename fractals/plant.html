@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <title>Fractals</title>
+    </head>
+    <body>
+        <canvas id="mycanvas" height="600" width="600"></canvas>
+    </body>
+    <script>
+        var g_canvas = document.getElementById('mycanvas');
+        var g_context = g_canvas.getContext('2d');
+        g_context.translate(g_canvas.width/2, 0);
+    </script>
+    <script src="plant.js"></script>
+    <script>
+        const initial_state = {
+            x: 0,
+            y: 0,
+            state: 'X',
+            time: 0,
+            direction: 0,
+            children: '',
+            last_positions: []
+        };
+        const system = new LSystem(g_context, rules, actions, initial_state);
+        system.run(initial_state);
+    </script>
+</html>
