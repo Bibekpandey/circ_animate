@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>The Particles</title>
+    </head>
+    <body>
+        <canvas id="mycanvas" height="900" width="900"></canvas>
+    </body>
+    <script>
+        const canvas = document.getElementById('mycanvas');
+        const ctx = canvas.getContext('2d');
+    </script>
+    <script src="index.js"></script>
+    <script>
+        // fill canvas with black
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const particle = new Particle(ctx);
+
+        const scene = new Scene(ctx, createParticles(ctx, 15, 5));
+        scene.animate();
+    </script>
+</html>
