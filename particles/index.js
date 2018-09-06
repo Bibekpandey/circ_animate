@@ -1,15 +1,21 @@
-const zeroVector = () => ({x: 0, y: 0});
+const zeroVector = {x: 0, y: 0};
+const Color = (r, g, b) => ({r, g, b});
+
+const COLORS = {
+    skyblue: Color(0, 191, 255),
+    red: Color(255, 0, 0),
+};
 
 const ParticleProps = (
         size=1,
-        position=zeroVector(),
-        velocity=zeroVector(),
-        acceleration=zeroVector(),
-        color='skyblue',
+        position=zeroVector,
+        velocity=zeroVector,
+        acceleration=zeroVector,
+        color=COLORS.skyblue,
     ) => ({ size, position, velocity, acceleration, color,});
 
 class Force {
-    constructor(position={x:0,y:0}, radius=25, maxMagnitude=1) {
+    constructor(position={x:1000,y:1000}, radius=25, maxMagnitude=1) {
         this.position = position;
         this.radius = radius;
         this.maxMagnitude = maxMagnitude;
@@ -35,7 +41,8 @@ class Force {
         // which gives, c = 9.966 and m = log2(150) / rad
         const c = 9.966;
         const m = Math.log2(150) / this.radius;
-        return this.maxMagnitude *(1- Math.pow(2, m*dist - c));
+        const mag = this.maxMagnitude *(1- Math.pow(2, m*dist - c));
+        return mag < 0 ? 0 : mag;
     }
 
     calculateDir() {
@@ -67,7 +74,7 @@ class Scene {
             const dist = distance(x.state.position, force.position);
             const particleDir = normalized(direction(force.position, x.state.position));
             const angle = vecToAngle(particleDir);
-            const forceMag = force.getMagnitude(forceRad, force.magnitude, dist);
+            const forceMag = force.getMagnitude(dist);
             const acceleration = {
                 x: Math.cos(angle) * forceMag,
                 y: Math.sin(angle) * forceMag,
@@ -77,19 +84,12 @@ class Scene {
         });
     }
 
-    animate() {
+    animate(t=0) {
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
         this.update();
-        this.elements.map((x) => x.render());
-        // render mousePos
-        this.ctx.fillStyle = 'black';
-        this.ctx.beginPath();
-        const {x, y} = getCanvasPosition(this.force.position, this.ctx.canvas);
-        this.ctx.arc(x,y,this.force.radius,0,2*Math.PI);
-        this.ctx.fill();
-        this.ctx.stroke();
-        window.setTimeout(this.animate, 1000/20);
+        this.elements.map((x) => x.render(t));
+        window.setTimeout(() => this.animate(t+1), 1000/60);
     }
 }
 
@@ -109,7 +109,7 @@ class Particle {
         }
 
         this.oscillateDir = Math.random() * Math.PI * 2; // It's original direction
-        this.K = Math.random(); //  F = -Kx
+        this.K = Math.random()*0.5; //  F = -Kx
 
         this.render = this.render.bind(this);
         this.clear = this.clear.bind(this);
@@ -125,8 +125,8 @@ class Particle {
 
         const {x, y} = this.state.acceleration;
         this.state.acceleration = {
-            x: -this.K * distWithOriginalPos * Math.cos(angle),
-            y: -this.K * distWithOriginalPos * Math.sin(angle),
+            x: x-this.K * distWithOriginalPos * Math.cos(angle),
+            y: x-this.K * distWithOriginalPos * Math.sin(angle),
         };
         this.state.velocity = {
             x: this.state.velocity.x + this.state.acceleration.x,
@@ -156,10 +156,12 @@ class Particle {
     }
 
     render(t=0) {
-        // this.updateSelf(t);
+        //this.updateSelf(t);
         this.update(t);
         const {x, y} = getCanvasPosition(this.state.position, this.ctx.canvas);
-        ctx.fillStyle = this.state.color;
+        const vel = distance(this.state.velocity, zeroVector);
+        const color = interpolate(COLORS.skyblue, COLORS.red, vel/1000);
+        ctx.fillStyle = colorToStr(color);
         ctx.fillRect(x,y, 1*this.state.size, 1*this.state.size);
     }
 }
@@ -195,8 +197,8 @@ function createParticles(ctx, X, Y) {
     let particles = [];
 
     let x, y;
-    for(let i=-X; i<X; i++) {
-        for(let j=-Y; j< Y; j++) {
+    for(let i=-X+1; i<X; i++) {
+        for(let j=-Y+1; j< Y; j++) {
             x = offset * i;
             y = offset * j;
             props = ParticleProps(size=2,position={x, y});
@@ -210,3 +212,13 @@ const getCanvasPosition = (pos, canvas) => ({
     x: canvas.clientWidth/2 + pos.x,
     y: canvas.clientHeight/2 - pos.y
 });
+
+const colorToInt = ({r, g, b}) => b + g*256 + r* 256*256;
+const intToColor = (i) => ({b:i%256, g: parseInt(i/256)%256, r: parseInt(i/(256*256))});
+const colorToStr = ({r, g, b}) => `rgb(${r}, ${g}, ${b})`;
+
+const interpolate = (colora, colorb, t)  => {
+    const a = colorToInt(colora);
+    const b = colorToInt(colorb);
+    return intToColor(b * t + (1-t)*a);
+}
