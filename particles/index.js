@@ -15,7 +15,7 @@ const ParticleProps = (
     ) => ({ size, position, velocity, acceleration, color,});
 
 class Force {
-    constructor(position={x:1000,y:1000}, radius=25, maxMagnitude=1) {
+    constructor(position={x:1000,y:1000}, radius=35, maxMagnitude=3) {
         this.position = position;
         this.radius = radius;
         this.maxMagnitude = maxMagnitude;
@@ -70,17 +70,9 @@ class Scene {
         // The force will have effect of an exponential function, very high near its center,
         // and decaying rapidly outwards its radius
 
-        this.elements = this.elements.map((x) => {
-            const dist = distance(x.state.position, force.position);
-            const particleDir = normalized(direction(force.position, x.state.position));
-            const angle = vecToAngle(particleDir);
-            const forceMag = force.getMagnitude(dist);
-            const acceleration = {
-                x: Math.cos(angle) * forceMag,
-                y: Math.sin(angle) * forceMag,
-            };
-            x.state.acceleration = {...acceleration};
-            return x;
+        this.elements = this.elements.map((e) => {
+            e.updateSelf(force);
+            return e;
         });
     }
 
@@ -98,25 +90,35 @@ class Particle {
     constructor(ctx, props = ParticleProps()) {
         this.ctx = ctx;
         this.initialPosition = props.position;
+        this.damping = 0.009;
 
         this.state = {
             ...props,
             lastPositions: [], // History of positions
         };
         this.state.position = {
-            x: this.state.position.x + Math.random() * 0.8,
-            y: this.state.position.y + Math.random() * 0.8,
+            x: this.state.position.x + Math.random() * 1.8,
+            y: this.state.position.y + Math.random() * 1.8,
         }
 
         this.oscillateDir = Math.random() * Math.PI * 2; // It's original direction
-        this.K = Math.random()*0.5; //  F = -Kx
+        this.K = Math.random()*0.1; //  F = -Kx
 
         this.render = this.render.bind(this);
         this.clear = this.clear.bind(this);
         this.updateSelf = this.updateSelf.bind(this);
     }
 
-    updateSelf(t) {
+    updateSelf(force) {
+        const dist = distance(this.state.position, force.position);
+        const particleDir = normalized(direction(force.position, this.state.position));
+        const fangle = vecToAngle(particleDir);
+        const forceMag = force.getMagnitude(dist);
+        const acceleration = {
+            x: Math.cos(fangle) * forceMag,
+            y: Math.sin(fangle) * forceMag,
+        };
+
         // it's own force, force like of spring, equilibrium position is its initial position
         const distWithOriginalPos = distance(this.initialPosition, this.state.position);
         const dirFromOriginalPos = normalized(direction(this.initialPosition, this.state.position));
@@ -125,20 +127,9 @@ class Particle {
 
         const {x, y} = this.state.acceleration;
         this.state.acceleration = {
-            x: x-this.K * distWithOriginalPos * Math.cos(angle),
-            y: x-this.K * distWithOriginalPos * Math.sin(angle),
+            x: acceleration.x -this.K * distWithOriginalPos * Math.cos(angle) - this.state.velocity.x * this.damping,
+            y: acceleration.y -this.K * distWithOriginalPos * Math.sin(angle) - this.state.velocity.y * this.damping,
         };
-        this.state.velocity = {
-            x: this.state.velocity.x + this.state.acceleration.x,
-            y: this.state.velocity.y + this.state.acceleration.y,
-        };
-        this.state.position = {
-            x: this.state.position.x + this.state.velocity.x,
-            y: this.state.position.y + this.state.velocity.y,
-        };
-    }
-
-    update(t) {
         this.state.velocity = {
             x: this.state.velocity.x + this.state.acceleration.x,
             y: this.state.velocity.y + this.state.acceleration.y,
@@ -156,12 +147,12 @@ class Particle {
     }
 
     render(t=0) {
-        //this.updateSelf(t);
-        this.update(t);
+        //this.updateSelf();
+        //this.update(t);
         const {x, y} = getCanvasPosition(this.state.position, this.ctx.canvas);
         const vel = distance(this.state.velocity, zeroVector);
         const color = interpolate(COLORS.skyblue, COLORS.red, vel/1000);
-        ctx.fillStyle = colorToStr(color);
+        ctx.fillStyle = colorToStr(this.state.color); // colorToStr(this.state.color)
         ctx.fillRect(x,y, 1*this.state.size, 1*this.state.size);
     }
 }
