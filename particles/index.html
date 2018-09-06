@@ -12,7 +12,7 @@
     <script src="index.js"></script>
     <script>
         // fill canvas with black
-        const scene = new Scene(ctx, createParticles(ctx, 25, 5));
+        const scene = new Scene(ctx, createParticles(ctx, 35, 35));
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -23,7 +23,8 @@
                 x: mousex - canvas.width/2,
                 y: canvas.height/2 - mousey
             };
-            scene.mousePos = {x: mousex, y: mousey};
+            scene.force.addToPositionHistory(newCoord);
+            scene.force.position = newCoord;
         };
 
         scene.animate();
