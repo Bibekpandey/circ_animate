@@ -15,9 +15,11 @@
         let particlesSpacing = 7;
         let vparticles = createParticles(ctx, 10, 25, 0, 0, particlesSpacing);
         let hparticles = createParticles(ctx, 30, 8, 0, particlesSpacing*(25+8-1), particlesSpacing);
-        const scene = new Scene(ctx, [...vparticles, ...hparticles]);
+
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const scene = new Scene(ctx, [...vparticles, ...hparticles]);
 
         canvas.onmousemove = (ev) => { 
             const mousex = ev.pageX - canvas.offsetLeft;

@@ -1,5 +1,6 @@
 const zeroVector = {x: 0, y: 0};
 const Color = (r, g, b) => ({r, g, b});
+const K = () => 0.02 + Math.random() * 0.3;
 
 const COLORS = {
     skyblue: Color(0, 191, 255),
@@ -15,10 +16,12 @@ const ParticleProps = (
     ) => ({ size, position, velocity, acceleration, color,});
 
 class Force {
-    constructor(position={x:1000,y:1000}, radius=35, maxMagnitude=3) {
+    constructor(position={x:1000,y:1000}, radius=40, maxMagnitude=3) {
         this.position = position;
         this.radius = radius;
         this.maxMagnitude = maxMagnitude;
+
+        // these are not used
         this.positionHistory = [{x:1000, y:1000}, {x:1000, y:1000},{x:1000, y:1000},];
         this.direction = {x: 0, y: 0};
 
@@ -46,42 +49,40 @@ class Force {
     }
 
     calculateDir() {
-        return normalized(direction(this.positionHistory[2], this.position));
+        return normalizedDir(this.positionHistory[2], this.position);
     }
 }
 
 class Scene {
-    constructor(ctx, elems=[]) {
+    constructor(ctx, elems=[], fps=60) {
         this.elements = elems;
         this.ctx = ctx;
         this.render = () => { this.elements.map(x => x.render()) };
         this.force = new Force();
+        this.fps = fps;
 
         this.update = this.update.bind(this);
         this.animate = this.animate.bind(this);
-        this.setForce = (f) => {this.force = f;};
     }
 
-    update() {
-        const force = this.force;
-        const forceRad = force.radius; // the radius of the force circle
-        const dir = force.calculateDir(); // normalized {x, y}
-
-        // The force will have effect of an exponential function, very high near its center,
-        // and decaying rapidly outwards its radius
-
+    update(t) {
+        // TODO: conside force direction as well
         this.elements = this.elements.map((e) => {
-            e.updateSelf(force);
+            e.update(this.force, t);
             return e;
         });
     }
 
     animate(t=0) {
-        this.ctx.fillStyle = 'black';
+        this.ctx.fillStyle = 'black'; // TODO: no hardcode
+        // clear canvas
         this.ctx.fillRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
-        this.update();
-        this.elements.map((x) => x.render(t));
-        window.setTimeout(() => this.animate(t+1), 1000/60);
+
+        // update and render elements
+        this.update(t);
+        this.elements.map((x) => x.render());
+
+        window.setTimeout(() => this.animate(t+1), 1000/this.fps);
     }
 }
 
@@ -91,69 +92,64 @@ class Particle {
         this.ctx = ctx;
         this.initialPosition = props.position;
         this.damping = 0.02;
+        this.K = K();
 
         this.state = {
             ...props,
-            lastPositions: [], // History of positions
+            lastPositions: [], // History of positions, not used now
         };
-        const plusMinus = () => Math.random() > 0.5 ? (a, b) => a + b : (a, b) => a - b;
+
+        // set random position initially
+        const plusMinus = (x) => Math.random() > 0.5 ? x : -x;
         this.state.position = {
-            x: plusMinus()(this.state.position.x,  Math.random() * 200),
-            y: plusMinus()(this.state.position.y,  Math.random() * 200),
+            x: plusMinus(Math.random() * 800),
+            y: plusMinus(Math.random() * 800),
         }
 
-        this.oscillateDir = Math.random() * Math.PI * 2; // It's original direction
-        this.K = Math.random()*0.1; //  F = -Kx
-
         this.render = this.render.bind(this);
-        this.clear = this.clear.bind(this);
-        this.updateSelf = this.updateSelf.bind(this);
+        this.update = this.update.bind(this);
     }
 
-    updateSelf(force) {
-        const dist = distance(this.state.position, force.position);
-        const particleDir = normalized(direction(force.position, this.state.position));
-        const fangle = vecToAngle(particleDir);
+    update(force, t) {
+
+        const {position, velocity} = this.state;
+
+        const dist = distance(position, force.position);
+        const particleDir = normalizedDir(force.position, position);
+
+        const forceAngle = vecToAngle(particleDir);
         const forceMag = force.getMagnitude(dist);
-        const acceleration = {
-            x: Math.cos(fangle) * forceMag,
-            y: Math.sin(fangle) * forceMag,
+
+        // acceleration due to force
+        const accDueToForce = {
+            x: Math.cos(forceAngle) * forceMag,
+            y: Math.sin(forceAngle) * forceMag,
         };
 
-        // it's own force, force like of spring, equilibrium position is its initial position
-        const distWithOriginalPos = distance(this.initialPosition, this.state.position);
-        const dirFromOriginalPos = normalized(direction(this.initialPosition, this.state.position));
+        // Calculating acceleration due to its displaced position (Same as spring mechanics)
+        const distWithOriginalPos = difference(position, this.initialPosition);
 
-        const angle = vecToAngle(dirFromOriginalPos);
-
-        const {x, y} = this.state.acceleration;
         this.state.acceleration = {
-            x: acceleration.x -this.K * distWithOriginalPos * Math.cos(angle) - this.state.velocity.x * this.damping,
-            y: acceleration.y -this.K * distWithOriginalPos * Math.sin(angle) - this.state.velocity.y * this.damping,
+            x: accDueToForce.x - this.K * distWithOriginalPos.x - velocity.x * this.damping,
+            y: accDueToForce.y - this.K * distWithOriginalPos.y - velocity.y * this.damping,
         };
-        this.state.velocity = {
-            x: this.state.velocity.x + this.state.acceleration.x,
-            y: this.state.velocity.y + this.state.acceleration.y,
-        };
-        this.state.position = {
-            x: this.state.position.x + this.state.velocity.x,
-            y: this.state.position.y + this.state.velocity.y,
-        };
-    }
 
-    clear () {
-        ctx.fillStyle = 'black';
-        const {x, y} = getCanvasPosition(this.state.position, this.ctx.canvas);
-        ctx.fillRect(x,y, 1*this.state.size, 1*this.state.size);
+        this.state.velocity = {
+            x: velocity.x + this.state.acceleration.x,
+            y: velocity.y + this.state.acceleration.y,
+        };
+
+        this.state.position = {
+            x: position.x + this.state.velocity.x,
+            y: position.y + this.state.velocity.y,
+        };
     }
 
     render(t=0) {
-        //this.updateSelf();
-        //this.update(t);
         const {x, y} = getCanvasPosition(this.state.position, this.ctx.canvas);
-        const vel = distance(this.state.velocity, zeroVector);
-        const color = interpolate(COLORS.skyblue, COLORS.red, vel/1000);
-        ctx.fillStyle = colorToStr(this.state.color); // colorToStr(this.state.color)
+        // TODO: can interpolate color based on distance from original position
+        ctx.fillStyle = colorToStr(this.state.color);
+
         ctx.fillRect(x,y, 1*this.state.size, 1*this.state.size);
     }
 }
@@ -164,9 +160,14 @@ class Particle {
 *************************************************/
 
 const distance = (a, b) => Math.sqrt(Math.pow(a.x-b.x, 2) + Math.pow(a.y-b.y, 2));
+const difference = (a, b) => ({
+    x: a.x - b.x,
+    y: a.y - b.y,
+});
 
 const direction = (from, to) => ({x: to.x - from.x, y: to.y - from.y});
 const normalized = ({x, y}) => ({x: x/(x*x + y*y), y: y/(x*x+y*y)});
+const normalizedDir = (from, to) => normalized(direction(from, to));
 
 const vecToAngle = ({x, y}) => {
     let angle;
