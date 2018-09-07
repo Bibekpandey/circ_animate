@@ -182,17 +182,16 @@ const vecToAngle = ({x, y}) => {
     }
 };
 
-function createParticles(ctx, X, Y) {
+function createParticles(ctx, X, Y, offx=0, offy=0, dist=7) {
     // create from -x to +x and -y to +y
-    const offset = 7;
     let props;
     let particles = [];
 
     let x, y;
     for(let i=-X+1; i<X; i++) {
         for(let j=-Y+1; j< Y; j++) {
-            x = offset * i;
-            y = offset * j;
+            x = dist * i + offx;
+            y = dist * j + offy;
             props = ParticleProps(size=2,position={x, y});
             particles.push(new Particle(ctx, props));
         }
