@@ -90,15 +90,16 @@ class Particle {
     constructor(ctx, props = ParticleProps()) {
         this.ctx = ctx;
         this.initialPosition = props.position;
-        this.damping = 0.009;
+        this.damping = 0.02;
 
         this.state = {
             ...props,
             lastPositions: [], // History of positions
         };
+        const plusMinus = () => Math.random() > 0.5 ? (a, b) => a + b : (a, b) => a - b;
         this.state.position = {
-            x: this.state.position.x + Math.random() * 1.8,
-            y: this.state.position.y + Math.random() * 1.8,
+            x: plusMinus()(this.state.position.x,  Math.random() * 200),
+            y: plusMinus()(this.state.position.y,  Math.random() * 200),
         }
 
         this.oscillateDir = Math.random() * Math.PI * 2; // It's original direction
