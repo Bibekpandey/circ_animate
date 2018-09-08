@@ -214,3 +214,18 @@ const interpolate = (colora, colorb, t)  => {
     const b = colorToInt(colorb);
     return intToColor(b * t + (1-t)*a);
 }
+
+function createParticlesFromSample(ctx, sample, dist=7) {
+    let particles = [];
+    sample.forEach((row, j) => {
+        row.forEach((cell, i) => {
+            if (cell === 1) {
+                const x = dist * i;
+                const y = -dist * j;
+                props = ParticleProps(size=2,position={x, y});
+                particles.push(new Particle(ctx, props));
+            }
+        });
+    });
+    return particles;
+}

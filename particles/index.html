@@ -4,11 +4,14 @@
     </head>
     <body>
         <canvas id="mycanvas" height="900" width="900"></canvas>
+        <br /><br/>
+        <canvas id="textcanvas" height="900" width="900" style="border: solid 1px"></canvas>
     </body>
     <script>
         const canvas = document.getElementById('mycanvas');
         const ctx = canvas.getContext('2d');
     </script>
+
     <script src="index.js"></script>
     <script>
         // fill canvas with black
@@ -19,7 +22,7 @@
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const scene = new Scene(ctx, [...vparticles, ...hparticles]);
+        let scene;
 
         canvas.onmousemove = (ev) => { 
             const mousex = ev.pageX - canvas.offsetLeft;
@@ -32,6 +35,20 @@
             scene.force.position = newCoord;
         };
 
+    </script>
+
+    <script src="text-sampling.js"></script>
+    <script>
+        const textcanvas = document.getElementById('textcanvas');
+        const tctx = textcanvas.getContext('2d');
+
+        tctx.fillStyle = 'white';
+        tctx.fillRect(0, 0, textcanvas.width, textcanvas.height);
+
+        drawText(tctx, 'B');
+        const sample = sampleCanvas(tctx);
+        scene = new Scene(ctx, createParticlesFromSample(ctx, sample));
         scene.animate();
     </script>
+
 </html>
