@@ -13,7 +13,7 @@ const ParticleProps = (
         position=zeroVector,
         velocity=zeroVector,
         acceleration=zeroVector,
-        color=COLORS.skyblue,
+        color='cyan',
         damping=0.05,
         K=() => 0.01, 
     ) => ({ size, position, velocity, acceleration, color, damping, K});
@@ -58,24 +58,59 @@ class Force {
 }
 
 export class ParticlesRenderer {
-    constructor(canvas, elems=[], fps=80) {
+    constructor(
+        parent=document.body,
+        elems=[],
+        props={fps:80, bgColor:'black', width:900, height:900,}
+    ) {
         this.elements = elems;
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+
+        this.canvas = document.createElement('canvas');
+        this.canvas.height = props.height;
+        this.canvas.width = props.width;
+
+        // write canvas to dom
+        parent.appendChild(this.canvas);
+        this.ctx = this.canvas.getContext('2d');
+
         this.render = () => { this.elements.map(x => x.render()) };
         this.force = new Force();
-        this.fps = fps;
+        this.fps = props.fps;
+        this.bgColor = props.bgColor;
 
         this.update = this.update.bind(this);
         this.drawText = this.drawText.bind(this);
         this.animate = this.animate.bind(this);
+
+        // add mouse move event to document
+        document.onmousemove = (ev) => { 
+            const mousex = ev.pageX - this.canvas.offsetLeft;
+            const mousey = ev.pageY - this.canvas.offsetTop;
+            const newCoord = {
+                x: mousex - this.canvas.width/2,
+                y: this.canvas.height/2 - mousey
+            };
+            this.force.addToPositionHistory(newCoord);
+            this.force.position = newCoord;
+        };
     }
 
     renderTextParticles(text) {
-        drawText(this.ctx, text);
+        // create a canvas dom element
+        const tcanvas = document.createElement('canvas');
+        tcanvas.width = 1000;
+        tcanvas.height= 1000;
+        const tctx = tcanvas.getContext('2d');
+        tctx.fillStyle = 'white';
+        tctx.fillRect(0, 0, tcanvas.width, tcanvas.height);
+
+        // draw text in the canvas
+        drawText(tctx, text);
+        // sample the canvas
         const sample = sampleCanvas(tctx);
+
         this.elements = createParticlesFromSample(this.ctx, sample);
-        this.animate();
+        //this.animate();
     }
 
     createParticles(x,y) {
@@ -95,7 +130,7 @@ export class ParticlesRenderer {
     }
 
     animate(t=0) {
-        this.ctx.fillStyle = 'black'; // TODO: no hardcode
+        this.ctx.fillStyle = this.bgColor;
         // clear canvas
         this.ctx.fillRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
 
@@ -171,9 +206,9 @@ class Particle {
     render(t=0) {
         const {x, y} = getCanvasPosition(this.state.position, this.ctx.canvas);
         // TODO: can interpolate color based on distance from original position
-        ctx.fillStyle = colorToStr(this.state.color);
+        this.ctx.fillStyle = this.state.color;
 
-        ctx.fillRect(x,y, 1*this.state.size, 1*this.state.size);
+        this.ctx.fillRect(x,y, 1*this.state.size, 1*this.state.size);
     }
 }
 
@@ -207,6 +242,7 @@ const vecToAngle = ({x, y}) => {
 };
 
 function createParticles(ctx, X, Y, offx=0, offy=0, dist=5) {
+    // TODO: send particle props
     // create from -x to +x and -y to +y
     let particles = [];
     let props;
@@ -239,13 +275,15 @@ const interpolate = (colora, colorb, t)  => {
 }
 
 function createParticlesFromSample(ctx, sample, dist=5) {
+    // TODO: send particle props
     let particles = [];
+    let props;
     sample.forEach((row, j) => {
         row.forEach((cell, i) => {
             if (cell === 1) {
                 const x = dist * i;
                 const y = -dist * j;
-                props = ParticleProps(size=2,position={x, y});
+                props = ParticleProps(1.5,{x, y});
                 particles.push(new Particle(ctx, props));
             }
         });

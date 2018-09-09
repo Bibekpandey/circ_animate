@@ -3,37 +3,16 @@
         <title>The Particles</title>
     </head>
     <body>
-        <canvas id="mycanvas" height="900" width="900"></canvas>
-        <br /><br/>
-        <canvas id="textcanvas" height="900" width="900" style="border: solid 1px"></canvas>
     </body>
-    <script>
-        const canvas = document.getElementById('mycanvas');
-        const ctx = canvas.getContext('2d');
-    </script>
 
     <script src="index.js" type="module"></script>
     <script type="module">
         import { ParticlesRenderer } from  './index.js';
-        // fill canvas with black
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const p = new ParticlesRenderer(canvas);
+        const p = new ParticlesRenderer(document.body);
 
-
-        document.onmousemove = (ev) => { 
-            const mousex = ev.pageX - canvas.offsetLeft;
-            const mousey = ev.pageY - canvas.offsetTop;
-            const newCoord = {
-                x: mousex - canvas.width/2,
-                y: canvas.height/2 - mousey
-            };
-            p.force.addToPositionHistory(newCoord);
-            p.force.position = newCoord;
-        };
-
-        p.createParticles(50, 50);
+        //p.createParticles(50, 50);
+        p.renderTextParticles('b');
         p.animate();
 
     </script>

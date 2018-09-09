@@ -5,8 +5,8 @@ export function drawText(ctx, text, fontName='Helvetica', size=60, style='bold')
 }
 
 export function sampleCanvas(ctx, pixVal=0, samplePoints={x:100, y: 100}) {
-    const W = ctx.canvas.clientWidth;
-    const H = ctx.canvas.clientHeight;
+    const W = ctx.canvas.width;
+    const H = ctx.canvas.height;
 
     var imgd = ctx.getImageData(0, 0, W, H);
     var pix = imgd.data;
