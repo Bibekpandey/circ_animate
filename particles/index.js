@@ -1,6 +1,6 @@
 import { drawText, sampleCanvas } from './text-sampling.js';
 
-const zeroVector = {x: 0, y: 0};
+const zeroVector = () => ({x: 0, y: 0});
 const Color = (r, g, b) => ({r, g, b});
 
 const COLORS = {
@@ -8,18 +8,18 @@ const COLORS = {
     red: Color(255, 0, 0),
 };
 
-const ParticleProps = (
-        size=1,
-        position=zeroVector,
-        velocity=zeroVector,
-        acceleration=zeroVector,
+export const ParticleProps = (
+        size=2,
+        position=zeroVector(),
+        velocity=zeroVector(),
+        acceleration=zeroVector(),
         color='cyan',
-        damping=0.05,
-        K=() => 0.01, 
+        damping=0.1,
+        K=0.01, 
     ) => ({ size, position, velocity, acceleration, color, damping, K});
 
-class Force {
-    constructor(position={x:1000,y:1000}, radius=40, maxMagnitude=3) {
+export class Force {
+    constructor(position={x:1000,y:1000}, radius=19, maxMagnitude=52) {
         this.position = position;
         this.radius = radius;
         this.maxMagnitude = maxMagnitude;
@@ -41,15 +41,13 @@ class Force {
     }
 
     getMagnitude(dist) {
-        // Equation of force is f = 1 - 2 ^ (mx - c)
-        // to find values for m and c, we have the following condition:
-        // when x = 0, f = 0.999 [can't keep 1 or power will give value 0]
-        // when x = rad, f = 0.85*maxMag
-        // which gives, c = 9.966 and m = log2(150) / rad
-        const c = 9.966;
-        const m = Math.log2(150) / this.radius;
-        const mag = this.maxMagnitude *(1- Math.pow(2, m*dist - c));
-        return mag < 0 ? 0 : mag;
+        // Equation of force is f = 1/(a*dist*dist + b)
+        //const c = 9.966;
+        //const m = Math.log2(150) / this.radius;
+        //let mag = this.maxMagnitude *(1- Math.pow(2, m*dist - c));
+        const a = 20/(this.radius*this.radius);
+        const b = 1;
+        return this.maxMagnitude* 1/(a*dist*dist + b);
     }
 
     calculateDir() {
@@ -59,21 +57,21 @@ class Force {
 
 export class ParticlesRenderer {
     constructor(
-        parent=document.body,
-        elems=[],
-        props={fps:80, bgColor:'black', width:900, height:900,}
+        canvas,
+        props={fps:80, bgColor:'black', width:900, height:900, elements:[],},
+        particleProps=ParticleProps()
     ) {
-        this.elements = elems;
+        this.elements = props.elements;
+        this.particleProps = particleProps;
 
-        this.canvas = document.createElement('canvas');
+        this.canvas = canvas;
         this.canvas.height = props.height;
         this.canvas.width = props.width;
 
         // write canvas to dom
-        parent.appendChild(this.canvas);
         this.ctx = this.canvas.getContext('2d');
 
-        this.render = () => { this.elements.map(x => x.render()) };
+        this.render = (t) => { this.elements.map(x => x.render(t)) };
         this.force = new Force();
         this.fps = props.fps;
         this.bgColor = props.bgColor;
@@ -84,6 +82,7 @@ export class ParticlesRenderer {
 
         // add mouse move event to document
         document.onmousemove = (ev) => { 
+            // TODO: what about already set mouse move event?
             const mousex = ev.pageX - this.canvas.offsetLeft;
             const mousey = ev.pageY - this.canvas.offsetTop;
             const newCoord = {
@@ -95,7 +94,7 @@ export class ParticlesRenderer {
         };
     }
 
-    renderTextParticles(text) {
+    renderTextParticles(text, fontName='Helvetica', size=60, style='bold') {
         // create a canvas dom element
         const tcanvas = document.createElement('canvas');
         // TODO: make the width and height dynamic
@@ -105,12 +104,14 @@ export class ParticlesRenderer {
         tctx.fillStyle = 'white';
         tctx.fillRect(0, 0, tcanvas.width, tcanvas.height);
 
+        document.body.appendChild(tcanvas);
+
         // draw text in the canvas
-        drawText(tctx, text);
+        drawText(tctx, text, fontName, size, style);
         // sample the canvas
         const sample = sampleCanvas(tctx);
 
-        this.elements = createParticlesFromSample(this.ctx, sample);
+        this.elements = createParticlesFromSample(this.ctx, sample, {...this.particleProps});
     }
 
     createParticles(x,y) {
@@ -136,7 +137,7 @@ export class ParticlesRenderer {
 
         // update and render elements
         this.update(t);
-        this.elements.map((x) => x.render());
+        this.elements.map((x) => x.render(t));
 
         window.setTimeout(() => this.animate(t+1), 1000/this.fps);
     }
@@ -149,8 +150,7 @@ class Particle {
     ) {
         this.ctx = ctx;
         this.initialPosition = props.position;
-        //this.damping = damping()
-        this.K = props.K();
+        this.K = props.K;
 
         this.state = {
             ...props,
@@ -158,7 +158,6 @@ class Particle {
         };
 
         // set random position initially
-        const plusMinus = (x) => Math.random() > 0.5 ? x : -x;
         this.state.position = {
             x: plusMinus(Math.random() * 800),
             y: plusMinus(Math.random() * 800),
@@ -201,10 +200,20 @@ class Particle {
             x: position.x + this.state.velocity.x,
             y: position.y + this.state.velocity.y,
         };
+        if (
+            Math.abs(this.state.acceleration.x) <= 0.001
+            && Math.abs(this.state.acceleration.y <= 0.001)
+            && Math.random() > 0.75
+        ) {
+            this.state.position = {
+                x: this.state.position.x + plusMinus(Math.random()*2),
+                y: this.state.position.y + plusMinus(Math.random()*2),
+            }
+        }
     }
 
-    render(t=0) {
-        const {x, y} = getCanvasPosition(this.state.position, this.ctx.canvas);
+    render(t) {
+        let {x, y} = getCanvasPosition(this.state.position, this.ctx.canvas);
         // TODO: can interpolate color based on distance from original position
         this.ctx.fillStyle = this.state.color;
 
@@ -217,6 +226,7 @@ class Particle {
  * HELPERS
 *************************************************/
 
+const plusMinus = (x) => Math.random() > 0.5 ? x : -x;
 const distance = (a, b) => Math.sqrt(Math.pow(a.x-b.x, 2) + Math.pow(a.y-b.y, 2));
 const difference = (a, b) => ({
     x: a.x - b.x,
@@ -274,12 +284,10 @@ const interpolate = (colora, colorb, t)  => {
     return intToColor(b * t + (1-t)*a);
 }
 
-function createParticlesFromSample(ctx, sample, dist=5, offset={x: 0, y: 0}) {
-    // TODO: send particle props
+function createParticlesFromSample(ctx, sample, particleProps=ParticleProps(), dist=5, offset={x: 0, y: 0}) {
     let particles = [];
     if(!sample) return particles;
 
-    let props;
     const cols = sample[0].length;
     const rows = sample.length;
     sample.forEach((row, j) => {
@@ -287,7 +295,10 @@ function createParticlesFromSample(ctx, sample, dist=5, offset={x: 0, y: 0}) {
             if (cell === 1) {
                 const x = offset.x + dist * (i - cols/2);
                 const y = offset.y + dist * (rows/2 - j);
-                props = ParticleProps(1.5,{x, y});
+                const props = {
+                    ...particleProps,
+                    position: { x, y }
+                };
                 particles.push(new Particle(ctx, props));
             }
         });

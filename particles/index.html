@@ -3,16 +3,22 @@
         <title>The Particles</title>
     </head>
     <body>
+        <canvas id="mycanvas"></canvas>
     </body>
 
     <script src="index.js" type="module"></script>
     <script type="module">
-        import { ParticlesRenderer } from  './index.js';
+        import { ParticlesRenderer, ParticleProps } from  './index.js';
 
-        const p = new ParticlesRenderer(document.body);
+        const props={fps:120, bgColor:'black', width:900, height:900,};
+        const particleProps = ParticleProps();
+        particleProps.color = '#fa7303';
+        particleProps.size = 1.5;
+
+        const p = new ParticlesRenderer(document.getElementById('mycanvas'), props, particleProps);
 
         //p.createParticles(50, 50);
-        p.renderTextParticles('BP');
+        p.renderTextParticles('fhx', 'Verdana', 200, 'bold italic');
         p.animate();
 
     </script>

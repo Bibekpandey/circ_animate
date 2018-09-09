@@ -1,10 +1,11 @@
 export function drawText(ctx, text, fontName='Helvetica', size=60, style='bold') {
+    console.log({fontName, size, style});
     ctx.fillStyle = 'black';
-    ctx.font = `italic bold ${size}px ${fontName}`;
+    ctx.font = `${style} ${size}px ${fontName}`;
     ctx.fillText(text,size, size);
 }
 
-export function sampleCanvas(ctx, pixVal=0, samplePoints={x:100, y: 100}) {
+export function sampleCanvas(ctx, pixVal=0, resolution=2) { // res 2 means, sample every second pixel in canvas
     const W = ctx.canvas.width;
     const H = ctx.canvas.height;
 
@@ -54,14 +55,14 @@ export function sampleCanvas(ctx, pixVal=0, samplePoints={x:100, y: 100}) {
     const dy = bottomright.y - topleft.y + 1;
     console.log({dx, dy});
 
-    const xsample = Math.ceil(dx/samplePoints.x);
-    const ysample = Math.ceil(dy/samplePoints.y);
+    //const xsample = 1;//Math.ceil(dx/samplePoints.x);
+    //const ysample = 1;//Math.ceil(dy/samplePoints.y);
 
     let sampledPoints = [];
 
-    for (let y=0;y<dy;y+=ysample) {
+    for (let y=0;y<dy;y+=resolution) {
         let samplerow = [];
-        for(let x=0;x<dx;x+=xsample) {
+        for(let x=0;x<dx;x+=resolution) {
             const ind = coordToPixelIndex({
                 x: topleft.x + x,
                 y: topleft.y + y
