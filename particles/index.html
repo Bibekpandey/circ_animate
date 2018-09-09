@@ -12,17 +12,15 @@
         const ctx = canvas.getContext('2d');
     </script>
 
-    <script src="index.js"></script>
-    <script>
+    <script src="index.js" type="module"></script>
+    <script type="module">
+        import { ParticlesRenderer } from  './index.js';
         // fill canvas with black
-        let particlesSpacing = 7;
-        let vparticles = createParticles(ctx, 10, 25, 0, 0, particlesSpacing);
-        let hparticles = createParticles(ctx, 30, 8, 0, particlesSpacing*(25+8-1), particlesSpacing);
-
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        let scene;
+        const p = new ParticlesRenderer(canvas);
+
 
         document.onmousemove = (ev) => { 
             const mousex = ev.pageX - canvas.offsetLeft;
@@ -31,12 +29,16 @@
                 x: mousex - canvas.width/2,
                 y: canvas.height/2 - mousey
             };
-            scene.force.addToPositionHistory(newCoord);
-            scene.force.position = newCoord;
+            p.force.addToPositionHistory(newCoord);
+            p.force.position = newCoord;
         };
+
+        p.createParticles(50, 50);
+        p.animate();
 
     </script>
 
+    <!--
     <script src="text-sampling.js"></script>
     <script>
         const textcanvas = document.getElementById('textcanvas');
@@ -50,5 +52,6 @@
         scene = new Scene(ctx, createParticlesFromSample(ctx, sample));
         scene.animate();
     </script>
+    -->
 
 </html>

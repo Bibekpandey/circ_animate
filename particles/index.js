@@ -1,3 +1,5 @@
+import { drawText, sampleCanvas } from './text-sampling.js';
+
 const zeroVector = {x: 0, y: 0};
 const Color = (r, g, b) => ({r, g, b});
 
@@ -55,16 +57,33 @@ class Force {
     }
 }
 
-class Scene {
-    constructor(ctx, elems=[], fps=80) {
+export class ParticlesRenderer {
+    constructor(canvas, elems=[], fps=80) {
         this.elements = elems;
-        this.ctx = ctx;
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
         this.render = () => { this.elements.map(x => x.render()) };
         this.force = new Force();
         this.fps = fps;
 
         this.update = this.update.bind(this);
+        this.drawText = this.drawText.bind(this);
         this.animate = this.animate.bind(this);
+    }
+
+    renderTextParticles(text) {
+        drawText(this.ctx, text);
+        const sample = sampleCanvas(tctx);
+        this.elements = createParticlesFromSample(this.ctx, sample);
+        this.animate();
+    }
+
+    createParticles(x,y) {
+        this.elements = createParticles(this.ctx, x, y);
+    }
+
+    drawText(text) {
+        drawText(this.ctx, text);
     }
 
     update(t) {
@@ -187,17 +206,17 @@ const vecToAngle = ({x, y}) => {
     }
 };
 
-function createParticles(ctx, X, Y, offx=0, offy=0, dist=7) {
+function createParticles(ctx, X, Y, offx=0, offy=0, dist=5) {
     // create from -x to +x and -y to +y
-    let props;
     let particles = [];
+    let props;
 
     let x, y;
     for(let i=-X+1; i<X; i++) {
         for(let j=-Y+1; j< Y; j++) {
             x = dist * i + offx;
             y = dist * j + offy;
-            props = ParticleProps(size=2,position={x, y});
+            props = ParticleProps(1.5,{x, y}); // size and position
             particles.push(new Particle(ctx, props));
         }
     }
@@ -219,7 +238,7 @@ const interpolate = (colora, colorb, t)  => {
     return intToColor(b * t + (1-t)*a);
 }
 
-function createParticlesFromSample(ctx, sample, dist=7) {
+function createParticlesFromSample(ctx, sample, dist=5) {
     let particles = [];
     sample.forEach((row, j) => {
         row.forEach((cell, i) => {

@@ -1,10 +1,10 @@
-function drawText(ctx, text, fontName='Helvetica', size=60, style='bold') {
+export function drawText(ctx, text, fontName='Helvetica', size=60, style='bold') {
     ctx.fillStyle = 'black';
     ctx.font = `italic bold ${size}px ${fontName}`;
     ctx.fillText(text,size, size);
 }
 
-function sampleCanvas(ctx, pixVal=0, samplePoints={x:100, y: 100}) {
+export function sampleCanvas(ctx, pixVal=0, samplePoints={x:100, y: 100}) {
     const W = ctx.canvas.clientWidth;
     const H = ctx.canvas.clientHeight;
 
