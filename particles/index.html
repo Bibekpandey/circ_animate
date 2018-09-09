@@ -12,25 +12,8 @@
         const p = new ParticlesRenderer(document.body);
 
         //p.createParticles(50, 50);
-        p.renderTextParticles('b');
+        p.renderTextParticles('BP');
         p.animate();
 
     </script>
-
-    <!--
-    <script src="text-sampling.js"></script>
-    <script>
-        const textcanvas = document.getElementById('textcanvas');
-        const tctx = textcanvas.getContext('2d');
-
-        tctx.fillStyle = 'white';
-        tctx.fillRect(0, 0, textcanvas.width, textcanvas.height);
-
-        drawText(tctx, 'TC');
-        const sample = sampleCanvas(tctx);
-        scene = new Scene(ctx, createParticlesFromSample(ctx, sample));
-        scene.animate();
-    </script>
-    -->
-
 </html>

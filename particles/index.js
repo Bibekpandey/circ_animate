@@ -98,6 +98,7 @@ export class ParticlesRenderer {
     renderTextParticles(text) {
         // create a canvas dom element
         const tcanvas = document.createElement('canvas');
+        // TODO: make the width and height dynamic
         tcanvas.width = 1000;
         tcanvas.height= 1000;
         const tctx = tcanvas.getContext('2d');
@@ -110,7 +111,6 @@ export class ParticlesRenderer {
         const sample = sampleCanvas(tctx);
 
         this.elements = createParticlesFromSample(this.ctx, sample);
-        //this.animate();
     }
 
     createParticles(x,y) {
@@ -274,15 +274,19 @@ const interpolate = (colora, colorb, t)  => {
     return intToColor(b * t + (1-t)*a);
 }
 
-function createParticlesFromSample(ctx, sample, dist=5) {
+function createParticlesFromSample(ctx, sample, dist=5, offset={x: 0, y: 0}) {
     // TODO: send particle props
     let particles = [];
+    if(!sample) return particles;
+
     let props;
+    const cols = sample[0].length;
+    const rows = sample.length;
     sample.forEach((row, j) => {
         row.forEach((cell, i) => {
             if (cell === 1) {
-                const x = dist * i;
-                const y = -dist * j;
+                const x = offset.x + dist * (i - cols/2);
+                const y = offset.y + dist * (rows/2 - j);
                 props = ParticleProps(1.5,{x, y});
                 particles.push(new Particle(ctx, props));
             }
