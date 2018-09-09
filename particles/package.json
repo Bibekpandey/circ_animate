@@ -1,0 +1,25 @@
+{
+  "name": "particles",
+  "version": "1.0.0",
+  "description": "Particles renderer in canvas",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bewakes/html-js-stuffs.git"
+  },
+  "keywords": [
+    "canvas",
+    "art",
+    "particles",
+    "physics"
+  ],
+  "author": "Bibek Pandey",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bewakes/html-js-stuffs/issues"
+  },
+  "homepage": "https://github.com/bewakes/html-js-stuffs#readme"
+}
