@@ -24,7 +24,7 @@
 
         let scene;
 
-        canvas.onmousemove = (ev) => { 
+        document.onmousemove = (ev) => { 
             const mousex = ev.pageX - canvas.offsetLeft;
             const mousey = ev.pageY - canvas.offsetTop;
             const newCoord = {
@@ -45,7 +45,7 @@
         tctx.fillStyle = 'white';
         tctx.fillRect(0, 0, textcanvas.width, textcanvas.height);
 
-        drawText(tctx, 'B');
+        drawText(tctx, 'TC');
         const sample = sampleCanvas(tctx);
         scene = new Scene(ctx, createParticlesFromSample(ctx, sample));
         scene.animate();

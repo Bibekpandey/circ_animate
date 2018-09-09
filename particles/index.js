@@ -1,6 +1,5 @@
 const zeroVector = {x: 0, y: 0};
 const Color = (r, g, b) => ({r, g, b});
-const K = () => 0.02 + Math.random() * 0.3;
 
 const COLORS = {
     skyblue: Color(0, 191, 255),
@@ -13,7 +12,9 @@ const ParticleProps = (
         velocity=zeroVector,
         acceleration=zeroVector,
         color=COLORS.skyblue,
-    ) => ({ size, position, velocity, acceleration, color,});
+        damping=0.05,
+        K=() => 0.01, 
+    ) => ({ size, position, velocity, acceleration, color, damping, K});
 
 class Force {
     constructor(position={x:1000,y:1000}, radius=40, maxMagnitude=3) {
@@ -21,8 +22,9 @@ class Force {
         this.radius = radius;
         this.maxMagnitude = maxMagnitude;
 
-        // these are not used
         this.positionHistory = [{x:1000, y:1000}, {x:1000, y:1000},{x:1000, y:1000},];
+
+        // these are not used
         this.direction = {x: 0, y: 0};
 
         this.getMagnitude = this.getMagnitude.bind(this);
@@ -54,7 +56,7 @@ class Force {
 }
 
 class Scene {
-    constructor(ctx, elems=[], fps=60) {
+    constructor(ctx, elems=[], fps=80) {
         this.elements = elems;
         this.ctx = ctx;
         this.render = () => { this.elements.map(x => x.render()) };
@@ -88,11 +90,13 @@ class Scene {
 
 
 class Particle {
-    constructor(ctx, props = ParticleProps()) {
+    constructor(ctx,
+            props = ParticleProps(),
+    ) {
         this.ctx = ctx;
         this.initialPosition = props.position;
-        this.damping = 0.02;
-        this.K = K();
+        //this.damping = damping()
+        this.K = props.K();
 
         this.state = {
             ...props,
@@ -112,7 +116,7 @@ class Particle {
 
     update(force, t) {
 
-        const {position, velocity} = this.state;
+        const {position, velocity, damping} = this.state;
 
         const dist = distance(position, force.position);
         const particleDir = normalizedDir(force.position, position);
@@ -130,8 +134,8 @@ class Particle {
         const distWithOriginalPos = difference(position, this.initialPosition);
 
         this.state.acceleration = {
-            x: accDueToForce.x - this.K * distWithOriginalPos.x - velocity.x * this.damping,
-            y: accDueToForce.y - this.K * distWithOriginalPos.y - velocity.y * this.damping,
+            x: accDueToForce.x - this.K * distWithOriginalPos.x - velocity.x * damping,
+            y: accDueToForce.y - this.K * distWithOriginalPos.y - velocity.y * damping,
         };
 
         this.state.velocity = {

@@ -1,8 +1,7 @@
-
-function drawText(ctx, text, fontName='Helvetica') {
+function drawText(ctx, text, fontName='Helvetica', size=60, style='bold') {
     ctx.fillStyle = 'black';
-    ctx.font = "90px "+fontName;
-    ctx.fillText(text,100, 100);
+    ctx.font = `italic bold ${size}px ${fontName}`;
+    ctx.fillText(text,size, size);
 }
 
 function sampleCanvas(ctx, pixVal=0, samplePoints={x:100, y: 100}) {
