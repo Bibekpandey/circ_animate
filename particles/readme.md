@@ -25,13 +25,6 @@ The following are default values for renderer props:
 ```
 The following are default values for particles props:
 ```javascript
-size=2,
-        position=zeroVector(),
-        velocity=zeroVector(),
-        acceleration=zeroVector(),
-        color='cyan',
-        damping=0.1,
-        K=0.01, 
 {
     size: 2,
     position: {x: 0, y: 0}, // origin is center of canvas and +y is up
