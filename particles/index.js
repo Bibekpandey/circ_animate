@@ -8,15 +8,15 @@ const COLORS = {
     red: Color(255, 0, 0),
 };
 
-export const ParticleProps = (
-        size=2,
-        position=zeroVector(),
-        velocity=zeroVector(),
-        acceleration=zeroVector(),
-        color='cyan',
-        damping=0.1,
-        K=0.01, 
-    ) => ({ size, position, velocity, acceleration, color, damping, K});
+export const defaultParticleProps = {
+    size: 2,
+    position: zeroVector(),
+    velocity: zeroVector(),
+    acceleration: zeroVector(),
+    color: 'cyan',
+    damping: 0.1,
+    K: 0.01, 
+};
 
 export class Force {
     constructor(position={x:1000,y:1000}, radius=19, maxMagnitude=52) {
@@ -56,13 +56,15 @@ export class Force {
 }
 
 export class ParticlesRenderer {
-    constructor(
-        canvas,
+    constructor( canvas,
         props={fps:80, bgColor:'black', width:900, height:900, elements:[],},
-        particleProps=ParticleProps()
+        particleProps={},
     ) {
         this.elements = props.elements;
-        this.particleProps = particleProps;
+        this.particleProps = {
+            ...defaultParticleProps,
+            ...particleProps,
+        };
 
         this.canvas = canvas;
         this.canvas.height = props.height;
@@ -79,19 +81,27 @@ export class ParticlesRenderer {
         this.update = this.update.bind(this);
         this.drawText = this.drawText.bind(this);
         this.animate = this.animate.bind(this);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.cleanUp = this.cleanUp.bind(this);
 
         // add mouse move event to document
-        document.onmousemove = (ev) => { 
-            // TODO: what about already set mouse move event?
-            const mousex = ev.pageX - this.canvas.offsetLeft;
-            const mousey = ev.pageY - this.canvas.offsetTop;
-            const newCoord = {
-                x: mousex - this.canvas.width/2,
-                y: this.canvas.height/2 - mousey
-            };
-            this.force.addToPositionHistory(newCoord);
-            this.force.position = newCoord;
+        document.addEventListener('mousemove', this.handleMouseMove, false);
+    }
+
+    handleMouseMove(ev) {
+        const mousex = ev.pageX - this.canvas.offsetLeft;
+        const mousey = ev.pageY - this.canvas.offsetTop;
+        const newCoord = {
+            x: mousex - this.canvas.width/2,
+            y: this.canvas.height/2 - mousey
         };
+        this.force.addToPositionHistory(newCoord);
+        this.force.position = newCoord;
+    }
+
+    cleanUp() {
+        document.removeEventListener('mousemove', this.handleMouseMove);
+        clearTimeout(this.timeout);
     }
 
     renderTextParticles(text, fontName='Helvetica', size=60, style='bold') {
@@ -137,20 +147,19 @@ export class ParticlesRenderer {
         this.update(t);
         this.elements.map((x) => x.render(t));
 
-        window.setTimeout(() => this.animate(t+1), 1000/this.fps);
+        this.timeout = window.setTimeout(() => this.animate(t+1), 1000/this.fps);
     }
 }
 
 
 class Particle {
-    constructor(ctx,
-            props = ParticleProps(),
-    ) {
+    constructor(ctx, props={}) {
         this.ctx = ctx;
         this.initialPosition = props.position;
         this.K = props.K;
 
         this.state = {
+            ...defaultParticleProps,
             ...props,
             lastPositions: [], // History of positions, not used now
         };
@@ -260,7 +269,11 @@ function createParticles(ctx, X, Y, offx=0, offy=0, dist=5) {
         for(let j=-Y+1; j< Y; j++) {
             x = dist * i + offx;
             y = dist * j + offy;
-            props = ParticleProps(1.5,{x, y}); // size and position
+            props = {
+                ...defaultParticleProps,
+                size: 1.5,
+                position: {x, y}
+            }
             particles.push(new Particle(ctx, props));
         }
     }
@@ -282,7 +295,7 @@ const interpolate = (colora, colorb, t)  => {
     return intToColor(b * t + (1-t)*a);
 }
 
-function createParticlesFromSample(ctx, sample, particleProps=ParticleProps(), dist=5, offset={x: 0, y: 0}) {
+function createParticlesFromSample(ctx, sample, particleProps=defaultParticleProps, dist=5, offset={x: 0, y: 0}) {
     let particles = [];
     if(!sample) return particles;
 

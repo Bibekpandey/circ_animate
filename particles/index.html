@@ -6,20 +6,24 @@
         <canvas id="mycanvas"></canvas>
     </body>
 
-    <script src="index.js" type="module"></script>
     <script type="module">
-        import { ParticlesRenderer, ParticleProps } from  './index.js';
+        import { ParticlesRenderer, defaultParticleProps} from  './index.js';
 
         const props={fps:120, bgColor:'black', width:900, height:900,};
-        const particleProps = ParticleProps();
+        const particleProps = defaultParticleProps;
         particleProps.color = '#0080ff';
         particleProps.size = 1.8;
 
-        const p = new ParticlesRenderer(document.getElementById('mycanvas'), props, particleProps);
+        let p;
 
-        //p.createParticles(50, 50);
-        p.renderTextParticles('fhx', 'Verdana', 200, 'bold italic');
-        p.animate();
+        const init = () => {
+            p = new ParticlesRenderer(document.getElementById('mycanvas'), props, particleProps);
+
+            //p.createParticles(50, 50);
+            p.renderTextParticles('fhx', 'Verdana', 200, 'bold italic');
+            p.animate();
+        };
+        init();
 
     </script>
 </html>
