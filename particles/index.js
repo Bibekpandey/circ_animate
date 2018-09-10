@@ -89,8 +89,9 @@ export class ParticlesRenderer {
     }
 
     handleMouseMove(ev) {
-        const mousex = ev.pageX - this.canvas.offsetLeft;
-        const mousey = ev.pageY - this.canvas.offsetTop;
+        const rect = this.canvas.getBoundingClientRect();
+        const mousex = ev.clientX - rect.left;
+        const mousey = ev.clientY - rect.top;
         const newCoord = {
             x: mousex - this.canvas.width/2,
             y: this.canvas.height/2 - mousey
@@ -114,6 +115,7 @@ export class ParticlesRenderer {
         tctx.fillStyle = 'white';
         tctx.fillRect(0, 0, tcanvas.width, tcanvas.height);
 
+        document.body.appendChild(tcanvas);
         // draw text in the canvas
         drawText(tctx, text, fontName, size, style);
         // sample the canvas
