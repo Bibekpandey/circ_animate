@@ -3,6 +3,9 @@
 A simple package to rendet text as particles in HTML canvas element.  
 Demo [here](https://bewakes.com/html-js-stuffs/particles/index.html)
 
+![Demo](https://github.com/bewakes/html-js-stuffs/blob/master/particles/demo.gif "Demo")
+
+
 ## Usage
 Import `{ ParticlesRenderer }` and use it as
 ```javascript

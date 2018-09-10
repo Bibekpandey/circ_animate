@@ -1,6 +1,6 @@
 {
   "name": "particles-renderer",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Particles renderer in canvas",
   "main": "index.js",
   "scripts": {
@@ -21,5 +21,5 @@
   "bugs": {
     "url": "https://github.com/bewakes/html-js-stuffs/issues"
   },
-  "homepage": "https://github.com/bewakes/html-js-stuffs/particles#readme"
+  "homepage": "https://github.com/bewakes/html-js-stuffs/tree/master/particles"
 }
