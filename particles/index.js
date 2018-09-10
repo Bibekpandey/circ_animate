@@ -115,7 +115,6 @@ export class ParticlesRenderer {
         tctx.fillStyle = 'white';
         tctx.fillRect(0, 0, tcanvas.width, tcanvas.height);
 
-        document.body.appendChild(tcanvas);
         // draw text in the canvas
         drawText(tctx, text, fontName, size, style);
         // sample the canvas
