@@ -18,11 +18,21 @@ export const defaultParticleProps = {
     K: 0.01, 
 };
 
+const defaultForceProps = {
+    position: {x: 1000, y: 1000},
+    radius: 20,
+    maxMagnitude: 50,
+};
+
 export class Force {
-    constructor(position={x:1000,y:1000}, radius=19, maxMagnitude=52) {
-        this.position = position;
-        this.radius = radius;
-        this.maxMagnitude = maxMagnitude;
+    constructor(props={}) {
+        const forceProps = {
+            ...defaultForceProps,
+            ...props,
+        };
+        this.position = forceProps.position;
+        this.radius = forceProps.radius;
+        this.maxMagnitude = forceProps.maxMagnitude;
 
         this.positionHistory = [{x:1000, y:1000}, {x:1000, y:1000},{x:1000, y:1000},];
 
@@ -55,10 +65,19 @@ export class Force {
     }
 }
 
+const defaultRendererProps = {
+    fps:80,
+    bgColor:'black',
+    width:900,
+    height:900,
+    elements:[],
+};
+
 export class ParticlesRenderer {
     constructor( canvas,
-        props={fps:80, bgColor:'black', width:900, height:900, elements:[],},
+        props={},
         particleProps={},
+        forceProps={}
     ) {
         this.elements = props.elements;
         this.particleProps = {
@@ -67,25 +86,33 @@ export class ParticlesRenderer {
         };
 
         this.canvas = canvas;
-        this.canvas.height = props.height;
-        this.canvas.width = props.width;
+
+        const rendererProps = {
+            ...defaultRendererProps,
+            ...props,
+        };
+        this.canvas.height = rendererProps.height;
+        this.canvas.width = rendererProps.width;
+        this.fps = rendererProps.fps;
+        this.bgColor = rendererProps.bgColor;
+        this.force = new Force(forceProps);
 
         // write canvas to dom
         this.ctx = this.canvas.getContext('2d');
 
         this.render = (t) => { this.elements.map(x => x.render(t)) };
-        this.force = new Force();
-        this.fps = props.fps;
-        this.bgColor = props.bgColor;
 
         this.update = this.update.bind(this);
         this.drawText = this.drawText.bind(this);
         this.animate = this.animate.bind(this);
         this.handleMouseMove = this.handleMouseMove.bind(this);
         this.cleanUp = this.cleanUp.bind(this);
+    }
 
+    start() {
         // add mouse move event to document
         this.canvas.addEventListener('mousemove', this.handleMouseMove, false);
+        this.animate(0);
     }
 
     handleMouseMove(ev) {

@@ -7,21 +7,20 @@
     </body>
 
     <script type="module">
-        import { ParticlesRenderer, defaultParticleProps} from  './index.js';
+        import { ParticlesRenderer } from  './index.js';
 
-        const props={fps:120, bgColor:'black', width:900, height:900,};
-        const particleProps = defaultParticleProps;
-        particleProps.color = '#0080ff';
-        particleProps.size = 1.8;
+        const props={fps:120, height:700,};
+        const particleProps = { color:'#0080ff', size: 1.8 };
+        const forceProps = { radius: 10, maxMagnitude: 50 };
 
         let p;
 
         const init = () => {
-            p = new ParticlesRenderer(document.getElementById('mycanvas'), props, particleProps);
+            p = new ParticlesRenderer(document.getElementById('mycanvas'), props, particleProps, forceProps);
 
             //p.createParticles(50, 50);
-            p.renderTextParticles('fhx', 'Verdana', 200, 'bold italic');
-            p.animate();
+            p.renderTextParticles('Bibek', 'Verdana', 120, 'bold italic');
+            p.start();
         };
         init();
 
