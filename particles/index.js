@@ -85,7 +85,7 @@ export class ParticlesRenderer {
         this.cleanUp = this.cleanUp.bind(this);
 
         // add mouse move event to document
-        document.addEventListener('mousemove', this.handleMouseMove, false);
+        this.canvas.addEventListener('mousemove', this.handleMouseMove, false);
     }
 
     handleMouseMove(ev) {
@@ -100,7 +100,7 @@ export class ParticlesRenderer {
     }
 
     cleanUp() {
-        document.removeEventListener('mousemove', this.handleMouseMove);
+        this.canvas.removeEventListener('mousemove', this.handleMouseMove);
         clearTimeout(this.timeout);
     }
 
