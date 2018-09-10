@@ -1,6 +1,6 @@
 {
   "name": "particles-renderer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Particles renderer in canvas",
   "main": "index.js",
   "scripts": {
