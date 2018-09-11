@@ -1,12 +1,6 @@
 import { drawText, sampleCanvas } from './text-sampling.js';
 
 const zeroVector = () => ({x: 0, y: 0});
-const Color = (r, g, b) => ({r, g, b});
-
-const COLORS = {
-    skyblue: Color(0, 191, 255),
-    red: Color(255, 0, 0),
-};
 
 export const defaultParticleProps = {
     size: 2,
@@ -16,6 +10,7 @@ export const defaultParticleProps = {
     color: 'cyan',
     damping: 0.1,
     K: 0.01, 
+    restless: true, // particle won't stay static, will have small random motions even if no force acting
 };
 
 const defaultForceProps = {
@@ -71,6 +66,7 @@ const defaultRendererProps = {
     width:900,
     height:900,
     elements:[],
+    particlesSpacing: 2,
 };
 
 export class ParticlesRenderer {
@@ -87,14 +83,14 @@ export class ParticlesRenderer {
 
         this.canvas = canvas;
 
-        const rendererProps = {
+        this.props = {
             ...defaultRendererProps,
             ...props,
         };
-        this.canvas.height = rendererProps.height;
-        this.canvas.width = rendererProps.width;
-        this.fps = rendererProps.fps;
-        this.bgColor = rendererProps.bgColor;
+        this.canvas.height = this.props.height;
+        this.canvas.width = this.props.width;
+        
+
         this.force = new Force(forceProps);
 
         // write canvas to dom
@@ -147,7 +143,7 @@ export class ParticlesRenderer {
         // sample the canvas
         const sample = sampleCanvas(tctx);
 
-        this.elements = createParticlesFromSample(this.ctx, sample, {...this.particleProps});
+        this.elements = createParticlesFromSample(this.ctx, sample, {...this.particleProps}, this.props.particlesSpacing);
     }
 
     createParticles(x,y) {
@@ -167,7 +163,7 @@ export class ParticlesRenderer {
     }
 
     animate(t=0) {
-        this.ctx.fillStyle = this.bgColor;
+        this.ctx.fillStyle = this.props.bgColor;
         // clear canvas
         this.ctx.fillRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
 
@@ -175,7 +171,7 @@ export class ParticlesRenderer {
         this.update(t);
         this.elements.map((x) => x.render(t));
 
-        this.timeout = window.setTimeout(() => this.animate(t+1), 1000/this.fps);
+        this.timeout = window.setTimeout(() => this.animate(t+1), 1000/this.props.fps);
     }
 }
 
@@ -236,13 +232,14 @@ class Particle {
             y: position.y + this.state.velocity.y,
         };
         if (
-            Math.abs(this.state.acceleration.x) <= 0.001
-            && Math.abs(this.state.acceleration.y <= 0.001)
+            this.state.restless
+            && Math.abs(this.state.acceleration.x) <= 0.12
+            && Math.abs(this.state.acceleration.y <= 0.12)
             && Math.random() > 0.75
         ) {
             this.state.position = {
-                x: this.state.position.x + plusMinus(Math.random()*2),
-                y: this.state.position.y + plusMinus(Math.random()*2),
+                x: this.state.position.x + plusMinus(Math.random()*0.3),
+                y: this.state.position.y + Math.random()*0.3,
             }
         }
     }
@@ -313,15 +310,6 @@ const getCanvasPosition = (pos, canvas) => ({
     y: canvas.clientHeight/2 - pos.y
 });
 
-const colorToInt = ({r, g, b}) => b + g*256 + r* 256*256;
-const intToColor = (i) => ({b:i%256, g: parseInt(i/256)%256, r: parseInt(i/(256*256))});
-const colorToStr = ({r, g, b}) => `rgb(${r}, ${g}, ${b})`;
-
-const interpolate = (colora, colorb, t)  => {
-    const a = colorToInt(colora);
-    const b = colorToInt(colorb);
-    return intToColor(b * t + (1-t)*a);
-}
 
 function createParticlesFromSample(ctx, sample, particleProps=defaultParticleProps, dist=5, offset={x: 0, y: 0}) {
     let particles = [];

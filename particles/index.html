@@ -9,8 +9,8 @@
     <script type="module">
         import { ParticlesRenderer } from  './index.js';
 
-        const props={fps:120, height:700,};
-        const particleProps = { color:'#0080ff', size: 1.8 };
+        const props={fps:120, height:700, particlesSpacing:5};
+        const particleProps = { color:'#0080ff', size: 1.8, restless: false };
         const forceProps = { radius: 10, maxMagnitude: 50 };
 
         let p;

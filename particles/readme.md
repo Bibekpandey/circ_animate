@@ -25,6 +25,7 @@ defaultRendererProps = {
     bgColor:'black',
     width:900,
     height:900,
+    particlesSpacing: 2,
 }
 ```
 The following are default values for particles props:
@@ -36,7 +37,8 @@ The following are default values for particles props:
     acceleration: {x: 0, y: 0},
     color: 'cyan',
     damping: 0.1,
-    K: 0.01
+    K: 0.01,
+    restless: true, // particle won't stay static, will have small random motions even if no force acting
 }
 ```
 The following are default values for force props: 
