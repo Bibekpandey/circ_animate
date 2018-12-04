@@ -9,17 +9,23 @@
     <script type="module">
         import { ParticlesRenderer } from  './index.js';
 
-        const props={fps:120, height:700, particlesSpacing:5};
-        const particleProps = { color:'#0080ff', size: 1.8, restless: false };
-        const forceProps = { radius: 10, maxMagnitude: 50 };
+        const props={bgColor:'black', fps:60, height:700, particlesSpacing:4};
+        const particleProps = { color:'#0080ff', size: 1.5, restless: true, damping: 1.5 };
+        const forceProps = { radius: 20, maxMagnitude: 100 };
 
         let p;
 
         const init = () => {
-            p = new ParticlesRenderer(document.getElementById('mycanvas'), props, particleProps, forceProps);
+            p = new ParticlesRenderer(
+                document.getElementById('mycanvas'),
+                props,
+                particleProps,
+                forceProps
+            );
 
-            //p.createParticles(50, 50);
-            p.renderTextParticles('Bibek', 'Verdana', 120, 'bold italic');
+            p.createParticles(50, 50);
+            p.renderTextParticles('ARYAN', 'Verdana', 140, 'bold italic');
+            //p.renderImage('chisapaani.JPG')
             p.start();
         };
         init();

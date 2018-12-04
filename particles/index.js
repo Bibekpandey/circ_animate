@@ -1,4 +1,4 @@
-import { drawText, sampleCanvas } from './text-sampling.js';
+import { drawText, sampleCanvas, sampleImageCanvas } from './text-sampling.js';
 
 const zeroVector = () => ({x: 0, y: 0});
 
@@ -102,13 +102,20 @@ export class ParticlesRenderer {
         this.drawText = this.drawText.bind(this);
         this.animate = this.animate.bind(this);
         this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.handleMouseOut = this.handleMouseOut.bind(this);
         this.cleanUp = this.cleanUp.bind(this);
     }
 
     start() {
         // add mouse move event to document
         this.canvas.addEventListener('mousemove', this.handleMouseMove, false);
+        this.canvas.addEventListener('mouseout', this.handleMouseOut, false);
         this.animate(0);
+    }
+
+    handleMouseOut(ev) {
+        const position = {x: 10000, y: 10000};
+        this.force.position = position;
     }
 
     handleMouseMove(ev) {
@@ -125,6 +132,7 @@ export class ParticlesRenderer {
 
     cleanUp() {
         this.canvas.removeEventListener('mousemove', this.handleMouseMove);
+        this.canvas.addEventListener('mouseout', this.handleMouseOut);
         clearTimeout(this.timeout);
     }
 
@@ -144,6 +152,28 @@ export class ParticlesRenderer {
         const sample = sampleCanvas(tctx);
 
         this.elements = createParticlesFromSample(this.ctx, sample, {...this.particleProps}, this.props.particlesSpacing);
+    }
+
+    renderImage(src, width=1000, height=1000) {
+        // create a canvas dom element
+        const imageCanvas = document.createElement('canvas');
+        imageCanvas.width = width;
+        imageCanvas.height = height;
+        const ictx = imageCanvas.getContext('2d');
+
+        // load image in canvas
+        const image = new Image();
+        image.src = src;
+        image.onload = () => {
+            image.crossOrigin = "anonymous";
+            ictx.drawImage(image, 0, 0);
+            document.body.appendChild(imageCanvas);
+            // sample image
+            const sample = sampleImageCanvas(ictx, 5);
+            this.elements = createParticlesFromColoredSample(this.ctx, sample, {...this.particleProps}, this.props.particlesSpacing);
+            this.start();
+        };
+        
     }
 
     createParticles(x,y) {
@@ -328,6 +358,28 @@ function createParticlesFromSample(ctx, sample, particleProps=defaultParticlePro
                 };
                 particles.push(new Particle(ctx, props));
             }
+        });
+    });
+    return particles;
+}
+
+function createParticlesFromColoredSample(ctx, sample, particleProps=defaultParticleProps, dist=5, offset={x:0, y:0}) {
+    let particles = [];
+    if(!sample) return particles;
+
+    const cols = sample[0].length;
+    const rows = sample.length;
+    sample.forEach((row, j) => {
+        row.forEach((cell, i) => {
+            const x = offset.x + dist * (i - cols/2);
+            const y = offset.y + dist * (rows/2 - j);
+            const {r, g, b, a} = cell;
+            const props = {
+                ...particleProps,
+                position: { x, y },
+                color: `rgba(${r}, ${g}, ${b}, ${a})`,
+            };
+            particles.push(new Particle(ctx, props));
         });
     });
     return particles;

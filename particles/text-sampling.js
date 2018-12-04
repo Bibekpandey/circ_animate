@@ -55,9 +55,6 @@ export function sampleCanvas(ctx, pixVal=0, resolution=2) { // res 2 means, samp
     const dy = bottomright.y - topleft.y + 1;
     console.log({dx, dy});
 
-    //const xsample = 1;//Math.ceil(dx/samplePoints.x);
-    //const ysample = 1;//Math.ceil(dy/samplePoints.y);
-
     let sampledPoints = [];
 
     for (let y=0;y<dy;y+=resolution) {
@@ -72,6 +69,31 @@ export function sampleCanvas(ctx, pixVal=0, resolution=2) { // res 2 means, samp
             } else {
                 samplerow.push(0);
             }
+        }
+        sampledPoints.push(samplerow);
+    }
+    return sampledPoints;
+}
+
+export function sampleImageCanvas(ctx, resolution=550) {
+    const W = ctx.canvas.width;
+    const H = ctx.canvas.height;
+    console.log({W, H});
+
+    var imgd = ctx.getImageData(0, 0, W, H);
+    var pix = imgd.data;
+
+    let sampledPoints = [];
+    for(let y=0;y<H;y+=resolution) {
+        let samplerow = [];
+        for(let x=0;x<W;x+=resolution) {
+            const pixIndex = y*W*4 + x*4;
+            samplerow.push({
+                r:pix[pixIndex],
+                g:pix[pixIndex+1],
+                b:pix[pixIndex+2],
+                a:pix[pixIndex+3],
+            });
         }
         sampledPoints.push(samplerow);
     }
