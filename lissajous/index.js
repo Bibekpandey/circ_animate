@@ -9,6 +9,7 @@ export class Main {
         this.fps = fps;
 
         this.addElement = this.addElement.bind(this);
+        this.addElements = this.addElements.bind(this);
         this.update = this.update.bind(this);
         this.render = this.render.bind(this);
         this.run = this.run.bind(this);
@@ -16,6 +17,10 @@ export class Main {
 
     addElement(e) {
         this.elements.push(e);
+    }
+
+    addElements(elems) {
+        this.elements = [...this.elements, ...elems];
     }
 
     update() {
@@ -32,7 +37,7 @@ export class Main {
             ctx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
 
             positions.forEach(x => {
-                ctx.fillStyle = "#999999";
+                ctx.fillStyle = "#ffffff";
                 ctx.beginPath();
                 ctx.arc(x.x, x.y, 5, 0, 2 * Math.PI);
                 ctx.fill();
@@ -59,6 +64,7 @@ export class Parametric {
             boundWidth: 200,
             boundHeight: 200,
             speed: 1,
+            color: [0, 0, 0],
             ...conf,
         };
         this.speedCount = 0;
@@ -84,9 +90,10 @@ export class Parametric {
     }
 
     toGlobalPosition(position) {
+        const { xPos, yPos, boundWidth, boundHeight } = this.properties;
         return {
-            x: position.x + this.properties.xPos,
-            y: position.y + this.properties.yPos,
+            x: position.x + xPos + boundWidth / 2,
+            y: position.y + yPos + boundHeight / 2,
         }
     }
 
@@ -108,7 +115,10 @@ export class Parametric {
 
         const { x: prevX, y: prevY } = this.toGlobalPosition(this.previousPosition);
         const { x, y } = this.toGlobalPosition(this.currentPosition);
+        const {color } = this.properties;
 
+        ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(prevX, prevY);
         ctx.lineTo(x, y);

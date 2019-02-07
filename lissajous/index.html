@@ -8,18 +8,22 @@
                 z-index: 2;
             }
             #mycanvas {
+                background: black;
                 position: absolute;
                 z-index: 1;
             }
             #container {
                 position: relative;
             }
+            body {
+                background: black;
+            }
         </style>
     </head>
     <body>
         <div id="container">
-            <canvas id="mycanvas" width=500 height=500></canvas>
-            <canvas id="overlay-canvas" width=500 height=500></canvas>
+            <canvas id="mycanvas" width=1000 height=1000></canvas>
+            <canvas id="overlay-canvas" width=1000 height=1000></canvas>
         </div>
     </body>
 
@@ -29,20 +33,73 @@
         const canvas = document.getElementById('mycanvas');
         const overlayCanvas = document.getElementById('overlay-canvas');
 
-        const circle = new Parametric(
-            (t) => 50 * Math.cos(0.1*t),
-            (t) => 50 * Math.sin(0.1*t),
-            { xPos: 200, yPos: 200},
-        );
-        const circle2 = new Parametric(
-            (t) => 50 * Math.cos(0.1*t),
-            (t) => 50 * Math.sin(0.1*t),
-            { xPos: 400, yPos: 200, speed: 0.5},
-        );
+        const numCircles = 4;
+        const width = canvas.width/(numCircles+1);
+        const speedIncrement = 0.65;
 
         const main = new Main(canvas, overlayCanvas);
-        main.addElement(circle);
-        main.addElement(circle2);
+
+        const horzCircles = [...Array(numCircles).keys()].map((x, i) => {
+            return new Parametric(
+                (t) => 50 * Math.cos(0.1*t),
+                (t) => 50 * Math.sin(0.1*t),
+                {
+                    xPos: width*(i+1),
+                    yPos: 0,
+                    speed: speedIncrement*(i+1),
+                    boundWidth: width,
+                    boundHeight: width,
+                    color: [
+                        parseInt(100 + Math.random()*155),
+                        parseInt(105 + Math.random()*150),
+                        parseInt(100 + Math.random()*155),
+                    ]
+                },
+            );
+        });
+        
+
+        const vertCircles = [...Array(numCircles).keys()].map((x, i) => {
+            return new Parametric(
+                (t) => 50 * Math.cos(0.1*t),
+                (t) => 50 * Math.sin(0.1*t),
+                {
+                    xPos: 0,
+                    yPos: width*(i+1),
+                    speed: speedIncrement*(i+1),
+                    boundWidth: width,
+                    boundHeight: width,
+                    color: [...horzCircles[i].properties.color]
+                },
+            );
+        });
+
+        const otherCircles = horzCircles.map(h => {
+            return vertCircles.map(v => {
+                return new Parametric(
+                    (t) => h.positionAt(t).x,
+                    (t) => v.positionAt(t).y,
+                    {
+                        xPos: h.properties.xPos,
+                        yPos: v.properties.yPos,
+                        //speed: 1.5,
+                        boundWidth: width,
+                        boundHeight: width,
+                        color: [
+                            parseInt((v.properties.color[0] + h.properties.color[0])/ 2),
+                            parseInt((v.properties.color[2] + h.properties.color[1])/ 2),
+                            parseInt((v.properties.color[1] + h.properties.color[2])/ 2),
+                        ]
+                    },
+            );
+            });
+        }).reduce((a, x) => ([...a, ...x]), []);
+
+        //const vertCircles =  new Array(numCircles
+
+        main.addElements(horzCircles);
+        main.addElements(vertCircles);
+        main.addElements(otherCircles);
 
         main.run();
 
