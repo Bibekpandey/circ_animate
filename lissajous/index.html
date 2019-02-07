@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <title>Lissajous Curves</title>
+        <style>
+            #overlay-canvas {
+                position: absolute;
+                background-color: transparent;
+                z-index: 2;
+            }
+            #mycanvas {
+                position: absolute;
+                z-index: 1;
+            }
+            #container {
+                position: relative;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="mycanvas" width=500 height=500></canvas>
+            <canvas id="overlay-canvas" width=500 height=500></canvas>
+        </div>
+    </body>
+
+    <script type="module">
+        import { Main, Parametric } from './index.js';
+
+        const canvas = document.getElementById('mycanvas');
+        const overlayCanvas = document.getElementById('overlay-canvas');
+
+        const circle = new Parametric(
+            (t) => 50 * Math.cos(0.1*t),
+            (t) => 50 * Math.sin(0.1*t),
+            { xPos: 200, yPos: 200},
+        );
+        const circle2 = new Parametric(
+            (t) => 50 * Math.cos(0.1*t),
+            (t) => 50 * Math.sin(0.1*t),
+            { xPos: 400, yPos: 200, speed: 0.5},
+        );
+
+        const main = new Main(canvas, overlayCanvas);
+        main.addElement(circle);
+        main.addElement(circle2);
+
+        main.run();
+
+    </script>
+</html>
