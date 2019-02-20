@@ -1,0 +1,59 @@
+<html>
+    <head>
+        <title>Spiral Polygons</title>
+        <style>
+            body {
+                background: black;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="mycanvas" width=1200 height=1000></canvas>
+        </div>
+    </body>
+
+    <script type="module">
+        import {
+            RegularPolygon,
+            polygonRotateAngleForScaleDown,
+            rgbToHex,
+            interpolateColor,
+        } from './index.js';
+
+        const canvas = document.getElementById('mycanvas');
+        const ctx = canvas.getContext('2d');
+
+        const center = {x: 200, y: 200};
+        const point = {x: 0, y: 200 };
+
+        const sides = 6;
+        const scaleFactor = 0.97;
+        const numIter = 100/scaleFactor;
+        const polyRotate = polygonRotateAngleForScaleDown(scaleFactor, Math.PI*2/sides);
+
+        const props = {
+            sides,
+            radius: 250,
+            center: { x: 500, y: 500 },
+            points: null
+        };
+        const polygon = new RegularPolygon(props);
+
+        const fromColor = { r: 23, g: 55, b: 255 };
+        const toColor = { r: 0, g: 0, b: 0 };
+
+        let poly = polygon;
+
+        const animate = (count) => {
+            if (count > numIter) {
+                return;
+            }
+            const color = '#'+rgbToHex(interpolateColor(fromColor, toColor, numIter, count));
+            poly.render(ctx, color);
+            poly = poly.scale(scaleFactor).rotate(polyRotate);
+            setTimeout(animate, 100, count + 1);
+        }
+        animate(0);
+    </script>
+</html>

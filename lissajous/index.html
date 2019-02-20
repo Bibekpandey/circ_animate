@@ -41,8 +41,8 @@
 
         const horzCircles = [...Array(numCircles).keys()].map((x, i) => {
             return new Parametric(
-                (t) => 50 * Math.pow(Math.cos(0.1*t), i*2+1),
-                (t) => 50 * Math.pow(Math.sin(0.1*t), i*2+1),
+                (t) => 50 * Math.pow(Math.cos(0.1*t), 1),
+                (t) => 50 * Math.pow(Math.sin(0.1*t), 1),
                 {
                     xPos: width*(i+1),
                     yPos: 0,
@@ -60,8 +60,12 @@
 
         horzCircles.push(
             new Parametric(
-                (t) => 50 * Math.pow(Math.cos(0.1*t), 3),
-                (t) => 50 * Math.pow(Math.sin(0.1*t), 3),
+                /*
+                (t) => 50 * Math.pow(Math.cos(0.1*t + 0.25), 4),
+                (t) => 50 * Math.pow(Math.sin(0.1*t + 0.25), 3),
+                */
+                (t) => 50*Math.pow(Math.sin(0.1*t), 3),
+                (t) => 3.5 - 3.5*(13*Math.cos(0.1*t) - 5*Math.cos(0.2*t) - 2*Math.cos(0.3*t) - Math.cos(0.4*t)),
                 {
                     xPos: width*(numCircles+1),
                     yPos: 0,

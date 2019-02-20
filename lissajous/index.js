@@ -115,10 +115,17 @@ export class Parametric {
 
         const { x: prevX, y: prevY } = this.toGlobalPosition(this.previousPosition);
         const { x, y } = this.toGlobalPosition(this.currentPosition);
-        const {color } = this.properties;
+        const { color } = this.properties;
+
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
 
         ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(prevX, prevY);
         ctx.lineTo(x, y);
