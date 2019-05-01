@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>Snap!!</title>
+        <style>
+            body {
+                background: black;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="thanos" width=500 height=500></canvas>
+        </div>
+        <canvas id="temp-canvas" width=500 height=500></canvas>
+    </body>
+    <script type="module">
+        import {
+            getSplittedImageData,
+            renderCells
+        } from './index.js';
+
+        const canvas = document.getElementById('thanos');
+        const ctx = canvas.getContext('2d');
+        const cellSize = 10;
+        const cells = getSplittedImageData(canvas, cellSize, cellSize);
+        renderCells(ctx, cells);
+    </script>
+</html>
