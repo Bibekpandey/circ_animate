@@ -9,20 +9,20 @@
     </head>
     <body>
         <div id="container">
-            <canvas id="thanos" width=500 height=500></canvas>
+            <canvas id="thanos" width=100 height=100></canvas>
         </div>
-        <canvas id="temp-canvas" width=500 height=500></canvas>
     </body>
     <script type="module">
         import {
-            getSplittedImageData,
-            renderCells
+            getCellsFromCanvas,
+            run,
         } from './index.js';
 
         const canvas = document.getElementById('thanos');
         const ctx = canvas.getContext('2d');
-        const cellSize = 10;
-        const cells = getSplittedImageData(canvas, cellSize, cellSize);
-        renderCells(ctx, cells);
+        const cellSize = 4;
+        const cells = getCellsFromCanvas(canvas, cellSize, cellSize);
+
+        run(ctx, cells, 10);
     </script>
 </html>
