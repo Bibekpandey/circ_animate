@@ -1,0 +1,66 @@
+<html>
+    <head>
+        <title>SNAKE!!</title>
+        <style>
+            #snake {
+                border: solid 1px;
+            }
+            #container {
+                display: flex;
+            }
+            #game-container{
+                flex: 0 0 65%;
+            }
+            #info-container{
+                flex: 1;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="game-container">
+                <canvas id="snake" width=900 height=900></canvas>
+            </div>
+            <div id="info-container">
+                <h1>
+                    SCORE: <span id="score"></span>
+                </h1>
+                <br/>
+                <br/>
+                <div>
+                    <label><b>Level</b></label>
+                    <input type="range" min="1" max="10" value="5" id="level">
+                </div>
+            </div>
+        </div>
+    </body>
+
+<script type="module">
+
+import { Game } from './index.js';
+
+function changeLevel() {
+    alert('level changed');
+}
+
+const canvas = document.getElementById('snake')
+const levelInput = document.getElementById('level');
+let game = new Game(canvas, levelInput.value);
+game.run();
+
+levelInput.addEventListener('change', ev => {
+    game.stop();
+    game = new Game(canvas, ev.target.value);
+    game.run();
+});
+/*
+dir: right
+body: [r,r,r,r,r]
+
+dir: up
+body: [u,r,r,r,r]
+*/
+
+</script>
+
+</html>
