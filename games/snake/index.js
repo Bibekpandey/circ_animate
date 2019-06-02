@@ -56,6 +56,7 @@ export class Game {
 
             const bodyPoints = snake.getCellPositions().filter((xx, yy) => xx == x && yy == y);
             if (bodyPoints.length == 0){
+                console.warn('FOOD', x, y);
                 return [x,y];
             }
         };
@@ -163,6 +164,7 @@ export class Snake {
         this.state.body.forEach((elem) => {
             moveUnit = getUnit((elem + 2) % 4); // +2 gives opposite direction
             currPos = [currPos[0]+moveUnit[0], currPos[1]+moveUnit[1]];
+            currPos = getModuloPosition(currPos, this.gridWidth, this.gridHeight);
             if (currPos[0] === headpos[0] && currPos[1] === headpos[1]) {
                 this.collided = true;
                 return;
@@ -185,13 +187,7 @@ export class Snake {
         let posx = position[0] + moveUnit[0];
         let posy = position[1] + moveUnit[1];
 
-        if (posx * 2 >= this.gridWidth) posx = posx - this.gridWidth;
-        if (posx * 2 <= -this.gridWidth) posx = posx + this.gridWidth;
-
-        if (posy * 2 >= this.gridHeight) posy = posy - this.gridHeight;
-        if (posy * 2 <= -this.gridHeight) posy = posy + this.gridHeight;
-
-        this.state.position = [posx, posy];
+        this.state.position = getModuloPosition([posx, posy], this.gridWidth, this.gridHeight);
         
         this.state.body = [direction, ...body.slice(0, body.length-1)];
         if(foodEaten) {
@@ -206,6 +202,17 @@ function getUnit(direction) {
     if (direction == Direction.UP) return [0, 1];
     if (direction == Direction.DOWN) return [0, -1];
     return [0, 0];
+}
+
+function getModuloPosition(position, gridWidth, gridHeight) {
+    let [posx, posy] = position;
+
+    if (posx * 2 >= gridWidth) posx = posx - gridWidth;
+    if (posx * 2 <= -gridWidth) posx = posx + gridWidth;
+
+    if (posy * 2 >= gridHeight) posy = posy - gridHeight;
+    if (posy * 2 <= -gridHeight) posy = posy + gridHeight;
+    return [posx, posy];
 }
 
 
