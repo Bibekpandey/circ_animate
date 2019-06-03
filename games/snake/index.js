@@ -31,7 +31,7 @@ class MethodBinded {
 }
 
 
-export class Game extends MethodBinded {
+class Game extends MethodBinded {
     constructor(canvas, level) {
         super();
 
@@ -128,7 +128,7 @@ export class Game extends MethodBinded {
 }
 
 
-export class Snake extends MethodBinded {
+class Snake extends MethodBinded {
     constructor(gridWidth, gridHeight) {
         super();
         this.state = {
@@ -200,9 +200,14 @@ export class Snake extends MethodBinded {
         return cells;
     }
 
+    renderHead(ctx, position) {
+        renderCell(ctx, ...position, 1, DEFAULT_HEAD_COLOR);
+        // TODO: Make eyes
+    }
+
     render(ctx) {
         const cells = this.getCellPositions();
-        renderCell(ctx, ...cells[0], 1, DEFAULT_HEAD_COLOR);
+        this.renderHead(ctx, cells[0]);
         const bodySize = this.state.body.length;
         cells.splice(1).map(
             (cell, i) =>
