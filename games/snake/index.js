@@ -44,16 +44,17 @@ class Game extends MethodBinded {
         this.gridWidth = parseInt(canvas.width / CELL_SIZE);
 
         this.timeout = null;
-        this.state = {};
 
         this.init();
 
         this.bindMethods([
-            'run', 'init', 'stop', 'render', 'update', 'foodEaten', 'keyHandler',
+            'run', 'init', 'stop', 'render', 'update',
+            'foodEaten', 'keyHandler', 'upClick', 'downClick',
+            'leftClick', 'rightClick', 'cleanUp'
         ]);
     }
 
-    init () {
+    init() {
         this.state = {
             score: 0,
             snake: new Snake(this.gridWidth, this.gridHeight),
@@ -64,8 +65,23 @@ class Game extends MethodBinded {
 
         document.getElementById('level-text').innerHTML = this.level;
 
-        document.removeEventListener('keydown', this.keyHandler);
+        this.cleanUp();
+
         document.addEventListener('keydown', this.keyHandler.bind(this));
+
+        document.getElementById('up-button').addEventListener('click', this.upClick.bind(this));
+        document.getElementById('down-button').addEventListener('click', this.downClick.bind(this));
+        document.getElementById('left-button').addEventListener('click', this.leftClick.bind(this));
+        document.getElementById('right-button').addEventListener('click', this.rightClick.bind(this));
+    }
+
+    cleanUp() {
+        document.removeEventListener('keydown', this.keyHandler);
+
+        document.getElementById('up-button').removeEventListener('click', this.upClick);
+        document.getElementById('down-button').removeEventListener('click', this.downClick);
+        document.getElementById('left-button').removeEventListener('click', this.leftClick);
+        document.getElementById('right-button').removeEventListener('click', this.rightClick);
     }
 
     generateFood(snake) {
@@ -79,6 +95,22 @@ class Game extends MethodBinded {
                 return [x,y];
             }
         };
+    }
+
+    upClick() {
+        this.state.snake.handleMovement(KEY_UP);
+    }
+
+    downClick() {
+        this.state.snake.handleMovement(KEY_DOWN);
+    }
+
+    leftClick() {
+        this.state.snake.handleMovement(KEY_LEFT);
+    }
+
+    rightClick() {
+        this.state.snake.handleMovement(KEY_RIGHT);
     }
 
     keyHandler(ev) {
@@ -105,6 +137,7 @@ class Game extends MethodBinded {
     }
 
     stop() {
+        this.cleanUp();
         if(this.state.score > this.state.highscore) {
             localStorage.setItem('highscore', this.state.score);
         }
@@ -150,7 +183,8 @@ class Snake extends MethodBinded {
         this.keyHandled = true;
 
         this.bindMethods([
-            'render', 'update', 'handleMovement', 'getCellPositions',
+            'render', 'update', 'getCellPositions',
+            'handleMovement',
         ]);
     }
 

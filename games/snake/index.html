@@ -3,7 +3,7 @@
         <title>SNAKE!!</title>
         <style>
             body {
-                color: blue;
+                color: red;
                 bagkground: black;
             }
             #snake {
@@ -15,26 +15,59 @@
                 margin-left: auto;
                 margin-right: auto;
             }
-            #game-container, #level-container, #info-container, #restart {
-                margin-top: 20px;
+            #game-container, #level-container, #info-container, #restart, #input-container, a {
                 margin-left: auto;
                 margin-right: auto;
+            }
+            #level-container, #back-home {
+                margin-top: 10px;
+            }
+            #input-container {
+                display: none;
+                flex-direction: column;
+            }
+            #left-right {
+                display: flex;
+                flex-direction: row;
+            }
+            .button {
+                margin-left: auto;
+                margin-right: auto;
+                width: 90px;
+                height: 90px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #button-separator {
+                width: 90px;
             }
         </style>
     </head>
     <body>
         <div id="container">
             <div id="info-container">
-                <h1>
+                <h2>
                     SCORE: <span id="score"></span>
-                </h1>
-                <h3>
+                </h2>
+                <h4>
                     HIGHSCORE: <span id="high-score"></span>
-                </h3>
-                <br/>
+                </h4>
             </div>
             <div id="game-container">
                 <canvas id="snake" width=600 height=600></canvas>
+            </div>
+            <div>
+                <b><a onclick="return toggleInput()">Click to Show/Hide Input</a></b>
+            </div>
+            <div id="input-container">
+                <button class="button" id="up-button">^</button>
+                <div id="left-right">
+                    <button class="button" id="left-button">&lt;</button>
+                    <span id="button-separator"></span>
+                    <button class="button" id="right-button">&gt;</button>
+                </div>
+                <button class="button" id="down-button">v</button>
             </div>
             <div id="level-container">
                 <div>
@@ -48,6 +81,7 @@
                     <button id=restart-button type=button onclick="restart">Restart</button>
                 </div>
             </div>
+            <a id="back-home" href="https://bewakes.com"> BACK HOME </a>
         </div>
     </body>
 
@@ -58,7 +92,6 @@
 function setHighScoreText() {
     const highscore = parseInt(localStorage.getItem('highscore') || 0);
     const highscoretxt = document.getElementById('high-score');
-    console.warn(highscore);
     highscoretxt.innerHTML = highscore;
 }
 
@@ -66,6 +99,15 @@ function setHighScoreText() {
 const canvas = document.getElementById('snake')
 const levelInput = document.getElementById('level');
 const restartButton = document.getElementById('restart-button');
+
+let inputShown = false;
+
+function toggleInput() {
+    console.warn('here');
+    inputShown = !inputShown;
+    const inputsection = document.getElementById('input-container');
+    inputsection.style.display = inputShown ? 'flex' : 'none';
+}
 
 
 setHighScoreText();
