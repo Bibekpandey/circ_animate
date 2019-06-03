@@ -17,8 +17,19 @@ const DEFAULT_SNAKE_SIZE = 10;
 const DEFAULT_DIRECTION = Direction.RIGHT;
 
 
-export class Game {
+class MethodBinded {
+    bindMethods(methods) {
+        methods.forEach((method) => {
+            this[method] = this[method].bind(this);
+        });
+    }
+}
+
+
+export class Game extends MethodBinded {
     constructor(canvas, level) {
+        super();
+
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
 
@@ -36,12 +47,9 @@ export class Game {
 
         this.timeout = null;
 
-        this.run = this.run.bind(this);
-        this.stop = this.stop.bind(this);
-        this.render = this.render.bind(this);
-        this.update = this.update.bind(this);
-        this.foodEaten = this.foodEaten.bind(this);
-        this.keyHandler = this.keyHandler.bind(this);
+        this.bindMethods([
+            'run', 'stop', 'render', 'update', 'foodEaten', 'keyHandler',
+        ]);
 
         document.removeEventListener('keydown', this.keyHandler);
 
@@ -51,8 +59,8 @@ export class Game {
     generateFood(snake) {
         // TODO: break loop
         while(true) {
-            const x = -this.gridWidth/2 + parseInt(Math.random() * this.gridWidth);
-            const y = -this.gridHeight/2 + parseInt(Math.random() * this.gridHeight);
+            const x = parseInt(Math.random() * this.gridWidth);
+            const y = parseInt(Math.random() * this.gridHeight);
 
             const bodyPoints = snake.getCellPositions().filter((xx, yy) => xx == x && yy == y);
             if (bodyPoints.length == 0){
@@ -109,11 +117,11 @@ export class Game {
 }
 
 
-export class Snake {
+export class Snake extends MethodBinded {
     constructor(gridWidth, gridHeight) {
+        super();
         this.state = {
             size: DEFAULT_SNAKE_SIZE,
-            speed: 1, // 1 cell per second
             direction: DEFAULT_DIRECTION,
             position: [0, 0], // position of head
             body: Array.from({length: DEFAULT_SNAKE_SIZE - 1 }, (e, i) => DEFAULT_DIRECTION),
@@ -122,9 +130,9 @@ export class Snake {
         this.gridHeight = gridHeight;
         this.collided = false;
 
-        this.render = this.render.bind(this);
-        this.update = this.update.bind(this);
-        this.handleMovement = this.handleMovement.bind(this);
+        this.bindMethods([
+            'render', 'update', 'handleMovement',
+        ]);
     }
 
     hasCollided() {
@@ -196,23 +204,19 @@ export class Snake {
     }
 }
 
+
 function getUnit(direction) {
     if (direction == Direction.LEFT) return [-1, 0];
     if (direction == Direction.RIGHT) return [1, 0];
-    if (direction == Direction.UP) return [0, 1];
-    if (direction == Direction.DOWN) return [0, -1];
+    if (direction == Direction.UP) return [0, -1];
+    if (direction == Direction.DOWN) return [0, 1];
     return [0, 0];
 }
 
+
 function getModuloPosition(position, gridWidth, gridHeight) {
     let [posx, posy] = position;
-
-    if (posx * 2 >= gridWidth) posx = posx - gridWidth;
-    if (posx * 2 <= -gridWidth) posx = posx + gridWidth;
-
-    if (posy * 2 >= gridHeight) posy = posy - gridHeight;
-    if (posy * 2 <= -gridHeight) posy = posy + gridHeight;
-    return [posx, posy];
+    return [(posx + gridWidth) % gridWidth, (posy + gridHeight) % gridHeight];
 }
 
 
@@ -223,12 +227,12 @@ function clear(ctx, bg='white') {
 
 
 function renderCell(ctx, posX, posY, color='black', cellW=CELL_SIZE, cellH=CELL_SIZE) {
-    // NOTE: center is 0,0, with +y up and +x right
+    // NOTE: top left is 0,0, with +y down and +x right
     ctx.fillStyle = color;
     const { width, height } = ctx.canvas;
     const position = [
-        posX * cellW + width / 2 + 1,
-        -posY*cellH + height / 2 + 1
+        posX * cellW,
+        posY*cellH,
     ];
     ctx.fillRect(...position, cellW - 1, cellH - 1);
 }
