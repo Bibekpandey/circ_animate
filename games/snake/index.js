@@ -7,6 +7,7 @@ const Direction = {
 };
 
 const CELL_SIZE = 15;
+const ONE_THIRD_CELL = CELL_SIZE / 3;
 
 const KEY_LEFT = 37;
 const KEY_UP = 38;
@@ -64,7 +65,6 @@ export class Game extends MethodBinded {
 
             const bodyPoints = snake.getCellPositions().filter((xx, yy) => xx == x && yy == y);
             if (bodyPoints.length == 0){
-                console.warn('FOOD', x, y);
                 return [x,y];
             }
         };
@@ -98,7 +98,7 @@ export class Game extends MethodBinded {
         this.fillStyle = 'white';
 
         // render food
-        if (this.food) renderCell(this.ctx, ...this.food, 'blue');
+        if (this.food) renderCell(this.ctx, ...this.food, 1, 'orange');
         this.snake.render(this.ctx);
     }
 
@@ -191,8 +191,12 @@ export class Snake extends MethodBinded {
 
     render(ctx) {
         const cells = this.getCellPositions();
-        renderCell(ctx, ...cells[0], 'red');
-        cells.splice(1).map(cell => renderCell(ctx, ...cell));
+        renderCell(ctx, ...cells[0], 1, 'red');
+        const bodySize = this.state.body.length;
+        cells.splice(1).map(
+            (cell, i) =>
+                renderCell(ctx, ...cell, ((bodySize - i - 1) / bodySize))
+        );
     }
 
     update(foodEaten) {
@@ -234,13 +238,21 @@ function clear(ctx, bg='white') {
 }
 
 
-function renderCell(ctx, posX, posY, color='black', cellW=CELL_SIZE, cellH=CELL_SIZE) {
+function renderCell(ctx, posX, posY, ratio=1, color='black', cellW=CELL_SIZE, cellH=CELL_SIZE) {
     // NOTE: top left is 0,0, with +y down and +x right
     ctx.fillStyle = color;
     const { width, height } = ctx.canvas;
+    const cellSize = ONE_THIRD_CELL + (cellW - ONE_THIRD_CELL) * ratio;
     const position = [
-        posX * cellW,
-        posY*cellH,
+        posX * cellW + (cellW - cellSize) / 2,
+        posY*cellH + (cellH - cellSize) / 2,
     ];
-    ctx.fillRect(...position, cellW - 1, cellH - 1);
+    ctx.fillRect(...position,
+                 cellSize - 1,
+                 cellSize - 1,
+                );
+}
+
+function interpolate(step, maxResult, minResult, totalSteps) {
+    return parseInt(minResult + step * (maxResult - minResult) / totalSteps);
 }
