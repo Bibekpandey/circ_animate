@@ -16,6 +16,10 @@ const KEY_DOWN = 40;
 
 const DEFAULT_SNAKE_SIZE = 10;
 const DEFAULT_DIRECTION = Direction.RIGHT;
+const DEFAULT_SNAKE_COLOR = 'lightgreen';
+const DEFAULT_HEAD_COLOR = 'darkgreen';
+const DEFAULT_BACKGROUND = 'black';
+const FOOD_COLOR = 'orange';
 
 
 class MethodBinded {
@@ -35,26 +39,32 @@ export class Game extends MethodBinded {
         this.ctx = canvas.getContext('2d');
 
         this.level = parseInt(level);
-        this.state = {
-            points: 0,
-        };
+        
         this.gridHeight = parseInt(canvas.height / CELL_SIZE);
         this.gridWidth = parseInt(canvas.width / CELL_SIZE);
 
-        this.snake = new Snake(this.gridWidth, this.gridHeight);
-
-        this.food = null;
-        this.score = 0;
-
         this.timeout = null;
+        this.state = {};
+
+        this.init();
 
         this.bindMethods([
-            'run', 'stop', 'render', 'update', 'foodEaten', 'keyHandler',
+            'run', 'init', 'stop', 'render', 'update', 'foodEaten', 'keyHandler',
         ]);
+    }
+
+    init () {
+        this.state = {
+            score: 0,
+            snake: new Snake(this.gridWidth, this.gridHeight),
+            food: null,
+        };
+        this.food = null;
+
+        document.getElementById('level-text').innerHTML = this.level;
 
         document.removeEventListener('keydown', this.keyHandler);
-
-        document.addEventListener('keydown', this.keyHandler);
+        document.addEventListener('keydown', this.keyHandler.bind(this));
     }
 
     generateFood(snake) {
@@ -71,18 +81,19 @@ export class Game extends MethodBinded {
     }
 
     keyHandler(ev) {
-        this.snake.handleMovement(ev.keyCode);
+        this.state.snake.handleMovement(ev.keyCode);
     }
 
     foodEaten() {
-        const snakeHead = this.snake.getCellPositions()[0];
-        return snakeHead[0] == this.food[0] && snakeHead[1] == this.food[1];
+        const { food } = this.state;
+        const snakeHead = this.state.snake.getCellPositions()[0];
+        return snakeHead[0] == food[0] && snakeHead[1] == food[1];
     }
 
     run() {
         this.render();
         this.update();
-        if (this.snake.collided) {
+        if (this.state.snake.collided) {
             alert('Game Over');
             return;
         }
@@ -95,24 +106,24 @@ export class Game extends MethodBinded {
 
     render() {
         clear(this.ctx);
-        this.fillStyle = 'white';
-
+        const { food } = this.state;
         // render food
-        if (this.food) renderCell(this.ctx, ...this.food, 1, 'orange');
-        this.snake.render(this.ctx);
+        if (food) renderCell(this.ctx, ...food, 1, FOOD_COLOR);
+        this.state.snake.render(this.ctx);
     }
 
     update() {
-        if (this.food == null) {
-            this.food = this.generateFood(this.snake);
+        const { food, snake } = this.state;
+        if (food == null) {
+            this.state.food = this.generateFood(snake);
         }
         const foodEaten = this.foodEaten();
         if (foodEaten) {
-            this.food = null;
-            this.score += this.level;
+            this.state.food = null;
+            this.state.score += this.level;
         }
-        document.getElementById('score').innerHTML = this.score;
-        this.snake.update(foodEaten);
+        document.getElementById('score').innerHTML = this.state.score;
+        this.state.snake.update(foodEaten);
     }
 }
 
@@ -191,7 +202,7 @@ export class Snake extends MethodBinded {
 
     render(ctx) {
         const cells = this.getCellPositions();
-        renderCell(ctx, ...cells[0], 1, 'red');
+        renderCell(ctx, ...cells[0], 1, DEFAULT_HEAD_COLOR);
         const bodySize = this.state.body.length;
         cells.splice(1).map(
             (cell, i) =>
@@ -232,13 +243,13 @@ function getModuloPosition(position, gridWidth, gridHeight) {
 }
 
 
-function clear(ctx, bg='white') {
+function clear(ctx, bg=DEFAULT_BACKGROUND) {
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
 
-function renderCell(ctx, posX, posY, ratio=1, color='black', cellW=CELL_SIZE, cellH=CELL_SIZE) {
+function renderCell(ctx, posX, posY, ratio=1, color=DEFAULT_SNAKE_COLOR, cellW=CELL_SIZE, cellH=CELL_SIZE) {
     // NOTE: top left is 0,0, with +y down and +x right
     ctx.fillStyle = color;
     const { width, height } = ctx.canvas;
@@ -247,12 +258,5 @@ function renderCell(ctx, posX, posY, ratio=1, color='black', cellW=CELL_SIZE, ce
         posX * cellW + (cellW - cellSize) / 2,
         posY*cellH + (cellH - cellSize) / 2,
     ];
-    ctx.fillRect(...position,
-                 cellSize - 1,
-                 cellSize - 1,
-                );
-}
-
-function interpolate(step, maxResult, minResult, totalSteps) {
-    return parseInt(minResult + step * (maxResult - minResult) / totalSteps);
+    ctx.fillRect(...position, cellSize - 1, cellSize - 1);
 }

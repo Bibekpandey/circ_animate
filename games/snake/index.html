@@ -2,34 +2,48 @@
     <head>
         <title>SNAKE!!</title>
         <style>
+            body {
+                color: blue;
+                bagkground: black;
+            }
             #snake {
                 border: solid 1px;
             }
             #container {
                 display: flex;
+                flex-direction: column;
+                margin-left: auto;
+                margin-right: auto;
             }
-            #game-container{
-                flex: 0 0 65%;
-            }
-            #info-container{
-                flex: 1;
+            #game-container, #level-container, #info-container, #restart {
+                margin-top: 20px;
+                margin-left: auto;
+                margin-right: auto;
             }
         </style>
     </head>
     <body>
         <div id="container">
-            <div id="game-container">
-                <canvas id="snake" width=600 height=600></canvas>
-            </div>
             <div id="info-container">
                 <h1>
                     SCORE: <span id="score"></span>
                 </h1>
                 <br/>
-                <br/>
+                
+            </div>
+            <div id="game-container">
+                <canvas id="snake" width=600 height=600></canvas>
+            </div>
+            <div id="level-container">
                 <div>
-                    <label><b>Level</b></label>
+                    <label><b>Level <span id="level-text"> 5 </span></b></label>
                     <input type="range" min="1" max="10" value="5" id="level">
+                </div>
+            </div>
+            <div id="restart">
+                <br/>
+                <div >
+                    <button id=restart-button type=button onclick="restart">Restart</button>
                 </div>
             </div>
         </div>
@@ -39,12 +53,9 @@
 
 import { Game } from './index.js';
 
-function changeLevel() {
-    alert('level changed');
-}
-
 const canvas = document.getElementById('snake')
 const levelInput = document.getElementById('level');
+const restartButton = document.getElementById('restart-button');
 let game = new Game(canvas, levelInput.value);
 game.run();
 
@@ -53,14 +64,12 @@ levelInput.addEventListener('change', ev => {
     game = new Game(canvas, ev.target.value);
     game.run();
 });
-/*
-dir: right
-body: [r,r,r,r,r]
 
-dir: up
-body: [u,r,r,r,r]
-*/
-
+restartButton.addEventListener('click', ev => {
+    game.stop();
+    game.init();
+    game.run();
+});
 </script>
 
 </html>
