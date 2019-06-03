@@ -129,9 +129,10 @@ export class Snake extends MethodBinded {
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
         this.collided = false;
+        this.keyHandled = true;
 
         this.bindMethods([
-            'render', 'update', 'handleMovement',
+            'render', 'update', 'handleMovement', 'getCellPositions',
         ]);
     }
 
@@ -140,6 +141,10 @@ export class Snake extends MethodBinded {
     }
 
     handleMovement(key) {
+        if (!this.keyHandled) return;
+
+        this.keyHandled = false;
+
         let dir = -1;
         if (key == KEY_LEFT) dir = Direction.LEFT;
         else if (key == KEY_RIGHT) dir = Direction.RIGHT;
@@ -151,8 +156,10 @@ export class Snake extends MethodBinded {
         const dirMinus1 = direction + 3;
 
         if (dir < 0 || (dirPlus1 % 4 !== dir) && (dirMinus1 % 4 !== dir)) {
+            this.keyHandled = true;
             return;
         }
+
         const moveUnit = getUnit(dir);
         this.state = {
             ...this.state,
@@ -201,6 +208,7 @@ export class Snake extends MethodBinded {
         if(foodEaten) {
             this.state.body = [...this.state.body, this.state.body[body.length-1]];
         }
+        this.keyHandled = true;
     }
 }
 
