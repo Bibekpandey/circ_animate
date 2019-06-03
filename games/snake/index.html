@@ -28,8 +28,10 @@
                 <h1>
                     SCORE: <span id="score"></span>
                 </h1>
+                <h3>
+                    HIGHSCORE: <span id="high-score"></span>
+                </h3>
                 <br/>
-                
             </div>
             <div id="game-container">
                 <canvas id="snake" width=600 height=600></canvas>
@@ -52,11 +54,22 @@
 <script type="text/javascript" src="./index.js"></script>
 
 <script>
-// import { Game } from './index.js';
+
+function setHighScoreText() {
+    const highscore = parseInt(localStorage.getItem('highscore') || 0);
+    const highscoretxt = document.getElementById('high-score');
+    console.warn(highscore);
+    highscoretxt.innerHTML = highscore;
+}
+
 
 const canvas = document.getElementById('snake')
 const levelInput = document.getElementById('level');
 const restartButton = document.getElementById('restart-button');
+
+
+setHighScoreText();
+
 let game = new Game(canvas, levelInput.value);
 game.run();
 
@@ -64,12 +77,14 @@ levelInput.addEventListener('change', ev => {
     game.stop();
     game = new Game(canvas, ev.target.value);
     game.run();
+    setHighScoreText();
 });
 
 restartButton.addEventListener('click', ev => {
     game.stop();
     game.init();
     game.run();
+    setHighScoreText();
 });
 </script>
 

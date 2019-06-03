@@ -58,6 +58,7 @@ class Game extends MethodBinded {
             score: 0,
             snake: new Snake(this.gridWidth, this.gridHeight),
             food: null,
+            highscore: parseInt(localStorage.getItem('highscore') || 0),
         };
         this.food = null;
 
@@ -94,6 +95,9 @@ class Game extends MethodBinded {
         this.render();
         this.update();
         if (this.state.snake.collided) {
+            if(this.state.score > this.state.highscore) {
+                localStorage.setItem('highscore', this.state.score);
+            }
             alert('Game Over');
             return;
         }
@@ -101,6 +105,9 @@ class Game extends MethodBinded {
     }
 
     stop() {
+        if(this.state.score > this.state.highscore) {
+            localStorage.setItem('highscore', this.state.score);
+        }
         clearTimeout(this.timeout)
     }
 
