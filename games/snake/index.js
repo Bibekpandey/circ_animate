@@ -30,7 +30,6 @@ class MethodBinded {
     }
 }
 
-
 class Game extends MethodBinded {
     constructor(canvas, level) {
         super();
@@ -167,6 +166,9 @@ class Game extends MethodBinded {
     }
 }
 
+class Food extends MethodBinded {
+}
+
 
 class Snake extends MethodBinded {
     constructor(gridWidth, gridHeight) {
@@ -223,7 +225,10 @@ class Snake extends MethodBinded {
     getCellPositions() {
         const { position, direction } = this.state;
         let moveUnit = getUnit(direction);
-        const headpos = [position[0] + moveUnit[0], position[1] + moveUnit[1]];
+        const headpos = getModuloPosition(
+            [position[0] + moveUnit[0], position[1] + moveUnit[1]],
+            this.gridWidth, this.gridHeight,
+        );
         const cells = [headpos];
 
         // let renderDir = direction + 2 % 4; // if head is up, go to down, if left go right
@@ -234,7 +239,6 @@ class Snake extends MethodBinded {
             currPos = getModuloPosition(currPos, this.gridWidth, this.gridHeight);
             if (currPos[0] === headpos[0] && currPos[1] === headpos[1]) {
                 this.collided = true;
-                return;
             }
             cells.push(currPos);
         });
