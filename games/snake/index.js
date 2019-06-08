@@ -49,7 +49,7 @@ class Game extends MethodBinded {
         this.bindMethods([
             'run', 'init', 'stop', 'render', 'update',
             'foodEaten', 'keyHandler', 'upClick', 'downClick',
-            'leftClick', 'rightClick', 'cleanUp'
+            'leftClick', 'rightClick', 'cleanUp', 'generateFood',
         ]);
     }
 
@@ -57,10 +57,9 @@ class Game extends MethodBinded {
         this.state = {
             score: 0,
             snake: new Snake(this.gridWidth, this.gridHeight),
-            food: null,
+            food: [],
             highscore: parseInt(localStorage.getItem('highscore') || 0),
         };
-        this.food = null;
 
         document.getElementById('level-text').innerHTML = this.level;
 
@@ -84,16 +83,34 @@ class Game extends MethodBinded {
     }
 
     generateFood(snake) {
-        // TODO: break loop
+        const food = [];
+
         while(true) {
-            const x = parseInt(Math.random() * this.gridWidth);
-            const y = parseInt(Math.random() * this.gridHeight);
+            const x = randomInt(this.gridWidth);
+            const y = randomInt(this.gridHeight);
 
             const bodyPoints = snake.getCellPositions().filter((xx, yy) => xx == x && yy == y);
             if (bodyPoints.length == 0){
-                return [x,y];
+                food.push(new Food(this.ctx, [x,y], this.level));
+                break;
             }
         };
+        // After every 10 food eaten, generate a bonus food
+        if(parseInt(this.state.score/this.level) % 10 == 0) {
+            while(true) {
+                const x = randomInt(this.gridWidth-1);
+                const y = randomInt(this.gridHeight-1);
+
+                const bodyPoints = snake.getCellPositions().filter(
+                    (xx, yy) => Math.abs(xx - x) <= 2 && Math.abs(yy - y) <= 2
+                );
+                if (bodyPoints.length == 0){
+                    food.push(new Food(this.ctx, [x, y], this.level*3, 'BONUS'));
+                    break;
+                }
+            }
+        }
+        return food;
     }
 
     upClick() {
@@ -146,27 +163,82 @@ class Game extends MethodBinded {
     render() {
         clear(this.ctx);
         const { food } = this.state;
+
         // render food
-        if (food) renderCell(this.ctx, ...food, 1, FOOD_COLOR);
+        if (food) food.map(x => x.render());
+
         this.state.snake.render(this.ctx);
     }
 
     update() {
         const { food, snake } = this.state;
-        if (food == null) {
-            this.state.food = this.generateFood(snake);
+
+        if (food.length == 0) {
+            this.state.food = [
+                ...this.generateFood(snake),
+                ...this.state.food,
+            ];
         }
-        const foodEaten = this.foodEaten();
-        if (foodEaten) {
-            this.state.food = null;
-            this.state.score += this.level;
-        }
+
+        const snakePosistions = snake.getCellPositions();
+        const headPos = snakePosistions[0];
+
+        const [score, foodNotEaten] = this.state.food.reduce((acc, food) => {
+            const [score, notEatenFood] = acc;
+            if(!food.isEaten(headPos)) {
+                return [score, [...notEatenFood, food]];
+            }
+            else {
+                return [score + food.points, notEatenFood];
+            }
+        }, [0, []]);
+        
+        this.state.food = foodNotEaten;
+        this.state.score += score;
         document.getElementById('score').innerHTML = this.state.score;
-        this.state.snake.update(foodEaten);
+        this.state.snake.update(score);
     }
 }
 
 class Food extends MethodBinded {
+    constructor(ctx, position, points, type='NORMAL') {
+        super();
+
+        this.ctx = ctx;
+        this.position = position;
+        this.points = points;
+        this.type = type;
+
+        this.bindMethods(['render', 'isEaten',]);
+    }
+
+    render() {
+        const [x, y] = this.position;
+        if(this.type === 'NORMAL') {
+            renderCell(this.ctx, x, y, 1, FOOD_COLOR);
+        }
+        else if(this.type === 'BONUS') {
+            renderCell(this.ctx, x, y, 1, FOOD_COLOR);
+            renderCell(this.ctx, x+1, y, 1, FOOD_COLOR);
+            renderCell(this.ctx, x, y+1, 1, FOOD_COLOR);
+            renderCell(this.ctx, x+1, y+1, 1, FOOD_COLOR);
+        }
+    }
+
+    isEaten(headPos) {
+        const [x, y] = this.position;
+        const [xx, yy] = headPos;
+        if (this.type === 'NORMAL') {
+            return x === xx && y === yy;
+        }
+        else if (this.type === 'BONUS') {
+            return (x === xx && y === yy) ||
+                    (x+1 === xx && y === yy) ||
+                    (x === xx && y+1 === yy) ||
+                    (x+1 === xx && y+1 === yy);
+        }
+        return false;
+    }
 }
 
 
@@ -260,7 +332,7 @@ class Snake extends MethodBinded {
         );
     }
 
-    update(foodEaten) {
+    update(score) {
         const { direction, position, body } = this.state;
         const moveUnit = getUnit(direction);
 
@@ -270,7 +342,8 @@ class Snake extends MethodBinded {
         this.state.position = getModuloPosition([posx, posy], this.gridWidth, this.gridHeight);
         
         this.state.body = [direction, ...body.slice(0, body.length-1)];
-        if(foodEaten) {
+        // Whatever the score, increases by one for now
+        if(score > 0) {
             this.state.body = [...this.state.body, this.state.body[body.length-1]];
         }
         this.keyHandled = true;
@@ -309,4 +382,8 @@ function renderCell(ctx, posX, posY, ratio=1, color=DEFAULT_SNAKE_COLOR, cellW=C
         posY*cellH + (cellH - cellSize) / 2,
     ];
     ctx.fillRect(...position, cellSize - 1, cellSize - 1);
+}
+
+function randomInt(maxval) {
+    return parseInt(Math.random() * maxval);
 }
