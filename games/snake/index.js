@@ -21,14 +21,8 @@ const DEFAULT_HEAD_COLOR = 'darkgreen';
 const DEFAULT_BACKGROUND = 'black';
 const FOOD_COLOR = 'orange';
 
+const BONUS_FOOD_TIMEOUT = 100;
 
-class MethodBinded {
-    bindMethods(methods) {
-        methods.forEach((method) => {
-            this[method] = this[method].bind(this);
-        });
-    }
-}
 
 class Game extends MethodBinded {
     constructor(canvas, level) {
@@ -55,8 +49,9 @@ class Game extends MethodBinded {
 
     init() {
         this.state = {
+            time: 0,
             score: 0,
-            snake: new Snake(this.gridWidth, this.gridHeight),
+            snake: new Snake(this.ctx, this.gridWidth, this.gridHeight),
             food: [],
             highscore: parseInt(localStorage.getItem('highscore') || 0),
         };
@@ -91,7 +86,7 @@ class Game extends MethodBinded {
 
             const bodyPoints = snake.getCellPositions().filter((xx, yy) => xx == x && yy == y);
             if (bodyPoints.length == 0){
-                food.push(new Food(this.ctx, [x,y], this.level));
+                food.push(new Food(this.ctx, [x,y], this.level, this.state.time));
                 break;
             }
         };
@@ -105,7 +100,7 @@ class Game extends MethodBinded {
                     (xx, yy) => Math.abs(xx - x) <= 2 && Math.abs(yy - y) <= 2
                 );
                 if (bodyPoints.length == 0){
-                    food.push(new Food(this.ctx, [x, y], this.level*3, 'BONUS'));
+                    food.push(new Food(this.ctx, [x, y], this.level*3, this.state.time, 'BONUS'));
                     break;
                 }
             }
@@ -162,15 +157,15 @@ class Game extends MethodBinded {
 
     render() {
         clear(this.ctx);
-        const { food } = this.state;
+        const { food, time } = this.state;
 
         // render food
-        if (food) food.map(x => x.render());
+        if (food) food.map(x => x.render(time));
 
-        this.state.snake.render(this.ctx);
+        this.state.snake.render(time);
     }
 
-    update() {
+    update(time) {
         const { food, snake } = this.state;
 
         if (food.length == 0) {
@@ -185,6 +180,9 @@ class Game extends MethodBinded {
 
         const [score, foodNotEaten] = this.state.food.reduce((acc, food) => {
             const [score, notEatenFood] = acc;
+            if(food.isTimedOut(this.state.time)) {
+                return [score, notEatenFood];
+            }
             if(!food.isEaten(headPos)) {
                 return [score, [...notEatenFood, food]];
             }
@@ -197,193 +195,6 @@ class Game extends MethodBinded {
         this.state.score += score;
         document.getElementById('score').innerHTML = this.state.score;
         this.state.snake.update(score);
+        this.state.time += 1;
     }
-}
-
-class Food extends MethodBinded {
-    constructor(ctx, position, points, type='NORMAL') {
-        super();
-
-        this.ctx = ctx;
-        this.position = position;
-        this.points = points;
-        this.type = type;
-
-        this.bindMethods(['render', 'isEaten',]);
-    }
-
-    render() {
-        const [x, y] = this.position;
-        if(this.type === 'NORMAL') {
-            renderCell(this.ctx, x, y, 1, FOOD_COLOR);
-        }
-        else if(this.type === 'BONUS') {
-            renderCell(this.ctx, x, y, 1, FOOD_COLOR);
-            renderCell(this.ctx, x+1, y, 1, FOOD_COLOR);
-            renderCell(this.ctx, x, y+1, 1, FOOD_COLOR);
-            renderCell(this.ctx, x+1, y+1, 1, FOOD_COLOR);
-        }
-    }
-
-    isEaten(headPos) {
-        const [x, y] = this.position;
-        const [xx, yy] = headPos;
-        if (this.type === 'NORMAL') {
-            return x === xx && y === yy;
-        }
-        else if (this.type === 'BONUS') {
-            return (x === xx && y === yy) ||
-                    (x+1 === xx && y === yy) ||
-                    (x === xx && y+1 === yy) ||
-                    (x+1 === xx && y+1 === yy);
-        }
-        return false;
-    }
-}
-
-
-class Snake extends MethodBinded {
-    constructor(gridWidth, gridHeight) {
-        super();
-        this.state = {
-            size: DEFAULT_SNAKE_SIZE,
-            direction: DEFAULT_DIRECTION,
-            position: [0, 0], // position of head
-            body: Array.from({length: DEFAULT_SNAKE_SIZE - 1 }, (e, i) => DEFAULT_DIRECTION),
-        }
-        this.gridWidth = gridWidth;
-        this.gridHeight = gridHeight;
-        this.collided = false;
-        this.keyHandled = true;
-
-        this.bindMethods([
-            'render', 'update', 'getCellPositions',
-            'handleMovement',
-        ]);
-    }
-
-    hasCollided() {
-        return false;
-    }
-
-    handleMovement(key) {
-        if (!this.keyHandled) return;
-
-        this.keyHandled = false;
-
-        let dir = -1;
-        if (key == KEY_LEFT) dir = Direction.LEFT;
-        else if (key == KEY_RIGHT) dir = Direction.RIGHT;
-        else if (key == KEY_UP) dir = Direction.UP;
-        else if (key == KEY_DOWN) dir = Direction.DOWN;
-
-        const { direction, body, position } = this.state;
-        const dirPlus1 = direction + 1;
-        const dirMinus1 = direction + 3;
-
-        if (dir < 0 || (dirPlus1 % 4 !== dir) && (dirMinus1 % 4 !== dir)) {
-            this.keyHandled = true;
-            return;
-        }
-
-        const moveUnit = getUnit(dir);
-        this.state = {
-            ...this.state,
-            direction: dir,
-            body:[dir, ...body.slice(1)]
-        };
-    }
-
-    getCellPositions() {
-        const { position, direction } = this.state;
-        let moveUnit = getUnit(direction);
-        const headpos = getModuloPosition(
-            [position[0] + moveUnit[0], position[1] + moveUnit[1]],
-            this.gridWidth, this.gridHeight,
-        );
-        const cells = [headpos];
-
-        // let renderDir = direction + 2 % 4; // if head is up, go to down, if left go right
-        let currPos = [position[0] + moveUnit[0], position[1] + moveUnit[1]];
-        this.state.body.forEach((elem) => {
-            moveUnit = getUnit((elem + 2) % 4); // +2 gives opposite direction
-            currPos = [currPos[0]+moveUnit[0], currPos[1]+moveUnit[1]];
-            currPos = getModuloPosition(currPos, this.gridWidth, this.gridHeight);
-            if (currPos[0] === headpos[0] && currPos[1] === headpos[1]) {
-                this.collided = true;
-            }
-            cells.push(currPos);
-        });
-        return cells;
-    }
-
-    renderHead(ctx, position) {
-        renderCell(ctx, ...position, 1, DEFAULT_HEAD_COLOR);
-        // TODO: Make eyes
-    }
-
-    render(ctx) {
-        const cells = this.getCellPositions();
-        this.renderHead(ctx, cells[0]);
-        const bodySize = this.state.body.length;
-        cells.splice(1).map(
-            (cell, i) =>
-                renderCell(ctx, ...cell, ((bodySize - i - 1) / bodySize))
-        );
-    }
-
-    update(score) {
-        const { direction, position, body } = this.state;
-        const moveUnit = getUnit(direction);
-
-        let posx = position[0] + moveUnit[0];
-        let posy = position[1] + moveUnit[1];
-
-        this.state.position = getModuloPosition([posx, posy], this.gridWidth, this.gridHeight);
-        
-        this.state.body = [direction, ...body.slice(0, body.length-1)];
-        // Whatever the score, increases by one for now
-        if(score > 0) {
-            this.state.body = [...this.state.body, this.state.body[body.length-1]];
-        }
-        this.keyHandled = true;
-    }
-}
-
-
-function getUnit(direction) {
-    if (direction == Direction.LEFT) return [-1, 0];
-    if (direction == Direction.RIGHT) return [1, 0];
-    if (direction == Direction.UP) return [0, -1];
-    if (direction == Direction.DOWN) return [0, 1];
-    return [0, 0];
-}
-
-
-function getModuloPosition(position, gridWidth, gridHeight) {
-    let [posx, posy] = position;
-    return [(posx + gridWidth) % gridWidth, (posy + gridHeight) % gridHeight];
-}
-
-
-function clear(ctx, bg=DEFAULT_BACKGROUND) {
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-}
-
-
-function renderCell(ctx, posX, posY, ratio=1, color=DEFAULT_SNAKE_COLOR, cellW=CELL_SIZE, cellH=CELL_SIZE) {
-    // NOTE: top left is 0,0, with +y down and +x right
-    ctx.fillStyle = color;
-    const { width, height } = ctx.canvas;
-    const cellSize = ONE_THIRD_CELL + (cellW - ONE_THIRD_CELL) * ratio;
-    const position = [
-        posX * cellW + (cellW - cellSize) / 2,
-        posY*cellH + (cellH - cellSize) / 2,
-    ];
-    ctx.fillRect(...position, cellSize - 1, cellSize - 1);
-}
-
-function randomInt(maxval) {
-    return parseInt(Math.random() * maxval);
 }
