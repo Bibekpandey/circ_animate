@@ -11,16 +11,22 @@ export class Cell {
 
     write(ctx, newImageData, colorArr=[255,255,255,255]) {
         const { width, height } = ctx.canvas;
-        const { height: cellHeight, width: cellWidth } = this.state;
-        const { x, y, pixelsArray } = this.state;
+        const { cellHeight, cellWidth } = this.state;
+        const { x, y, data } = this.state;
+
         pixelsArray.forEach((pixelRow, rowIndex) => {
+            const baseind = (x*cellWidth + (y*cellHeight+rowIndex)*width) * 4;
             pixelRow.forEach((pixel, colIndex) => {
+
                 if(x * cellWidth > width || y * cellHeight > height) return;
-                const ind = (x*cellWidth + (y*cellHeight+rowIndex)*width) * 4 + colIndex;
-                newImageData.data[ind] = colorArr[0];
-                newImageData.data[ind+1] = colorArr[1];
-                newImageData.data[ind+2] = colorArr[2];
-                newImageData.data[ind+3] = 255;
+
+                const ind =  baseind + colIndex;
+                newImageData.data[ind] = pixel;
+                // TODO: x + 1 % 4 for alpha
+                //  newImageData.data[ind] = colorArr[0];
+                //  newImageData.data[ind+1] = colorArr[1];
+                //  newImageData.data[ind+2] = colorArr[2];
+                //  newImageData.data[ind+3] = 255;
             });
         });
         return newImageData;
@@ -36,15 +42,13 @@ export class Cell {
     }
 }
 
-export function getCellsFromCanvas(canvas, cellWidth=5, cellHeight=5) {
-    const { width, height } = canvas;
+export function getCellsFromCanvas(ctx, cellWidth=5, cellHeight=5) {
+    const { width, height } = ctx.canvas;
 
     if(width % cellWidth !== 0 || height % cellHeight !== 0) {
         throw "cell width/height does not divide canvas width/height";
     }
-    const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, width, height).data;
-
     const cells = [];
 
     for(let y=0;y<height;y+=cellHeight) {
@@ -55,11 +59,12 @@ export function getCellsFromCanvas(canvas, cellWidth=5, cellHeight=5) {
             for(let cy=0;cy<cellHeight;cy++) {
                 const pixelRow = [];
                 for(let cx=0;cx<cellWidth;cx++) {
+                    const ind = (y+cy)*width + (x+cx);
                     pixelRow.push(
-                        imageData[(y+cy)*width + (x+cx)],
-                        imageData[(y+cy)*width + (x+cx)+1],
-                        imageData[(y+cy)*width + (x+cx)+2],
-                        imageData[(y+cy)*width + (x+cx)+3],
+                        imageData[ind],
+                        imageData[ind+1],
+                        imageData[ind+2],
+                        imageData[ind+3],
                     );
                 }
                 pixelsArray.push(pixelRow);
@@ -78,20 +83,33 @@ export function getCellsFromCanvas(canvas, cellWidth=5, cellHeight=5) {
     return cells;
 }
 
-export function writeCell(ctx, cell, colorArr, newImageData, cellWidth, cellHeight) {
+export function canvasToCells(ctx, cellWidth, cellHeight) {
     const { width, height } = ctx.canvas;
-    const { x, y, pixelsArray } = cell.state;
-    pixelsArray.forEach((pixelRow, rowIndex) => {
-        pixelRow.forEach((pixel, colIndex) => {
-            const ind = (x*cellWidth + (y*cellHeight+rowIndex)*width) * 4 + colIndex;
-            newImageData.data[ind] = colorArr[0];
-            newImageData.data[ind+1] = colorArr[1];
-            newImageData.data[ind+2] = colorArr[2];
-            newImageData.data[ind+3] = 255;
-        });
-        
-    });
-    return newImageData;
+    const cells = [];
+
+    for (let row = 0; row<height/cellHeight; row++) {
+        cells.push([]);
+    }
+    const imageData = ctx.getImageData(0, 0, width, height).data;
+
+    for(let x=0;x<imageData.length; x+=4) {
+        const canvasRow = Math.floor(x/(4*width));
+        const canvasCol = x % (4*width);
+        const cellY = Math.floor(canvasRow / cellHeight);
+        const cellX = Math.floor(canvasCol / cellWidth);
+
+        if(!cells[cellY][cellX]) cells[cellY][cellX] = [];
+
+        cells[cellY][cellX].push([
+            imageData[x], imageData[x+1], imageData[x+2], imageData[x+3]
+        ]);
+    }
+    console.warn(cells);
+    // Now create Cell objects
+    return cells.reduce((allCells, row, y) => ([
+        ...allCells, 
+        ...row.map((cell, x) => new Cell({x, y, cellHeight, cellWidth, data: cell}))
+    ]), []);
 }
 
 export function run(ctx, cells, fps=60, t=1) {
@@ -102,6 +120,7 @@ export function run(ctx, cells, fps=60, t=1) {
         (imgData, cell) => cell.write(ctx, imgData),
         ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height),
     );
+    // console.warn(newImageData);
 
     ctx.putImageData(newImageData, 0, 0);
     const newCells = cells.map(cell =>  cell.update());

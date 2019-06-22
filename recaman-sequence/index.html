@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <title>Recaman Sequence Animation</title>
+    </head>
+    <body>
+        <canvas id="mycanvas" height="900" width="1800"></canvas>
+    </body>
+
+    <script type="module">
+        import { run, animateArc } from './index.js';
+        const canvas = document.getElementById('mycanvas');
+        const ctx = canvas.getContext('2d');
+
+        run(ctx);
+    </script>
+</html>
