@@ -101,18 +101,21 @@ class Circle {
         this.y = y;
         this.r = r;
         this.color = color
+        this.dir = Math.random() > 0.5 ? 1: -1;
 
         this.update = this.update.bind(this);
         this.render = this.render.bind(this);
     }
 
     update(t) {
-        this.x += 0.7;
-        this.y += 0.3 + Math.random();
+        const rand = Math.random()*Math.random();
+        const rand1 = Math.random();
+        this.x += (this.dir*rand1);
+        this.y += rand;
     }
 
     static random(colorShades=COLOR_PALETTE) {
-        const radius = parseInt(Math.random() * 2) + 1;
+        const radius = parseInt(Math.random() * 2.5) + 1;
         const randx = parseInt(Math.random() * context.canvas.width);
         const randy = parseInt(Math.random() * context.canvas.height);
         const randindex = parseInt(Math.random() * colorShades.length);
