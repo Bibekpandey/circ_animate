@@ -1,16 +1,5 @@
-const BLACK = [10, 10, 10];
-
-const COLOR_PALETTE = [
-    [32, 0, 40],
-    [82, 15, 125],
-    [99, 53, 126],
-    [102, 10, 150],
-    [132, 26, 200],
-    [165, 32, 250],
-    [196, 106, 251],
-];
-const FPS = 60;
-
+const STEPS = 30;
+const noiseZoom = 0.00085;
 
 function hslToRgb(h, s, l) {
     /*
@@ -46,6 +35,10 @@ function hslToRgb(h, s, l) {
 }
 
 
+function colorArrayToStr(arr) {
+    return `rgb(${arr[0]}, ${arr[1]}, ${arr[2]})`;
+}
+
 function getRandomColorShades(steps=6) {
     const lum = 75;
     const sat = parseInt(Math.random() * 70) + 30;
@@ -59,48 +52,54 @@ function getRandomColorShades(steps=6) {
 }
 
 
-
 class Hazer {
-    constructor(numcircles=100, context) {
+    constructor(numparticles=100, context) {
         this.shades = getRandomColorShades();
-        this.circles = [...Array(numcircles)].map(x=> Circle.random(this.shades));
+        this.particles = [...Array(numparticles)].map(x=> Particle.random(this.shades, context));
         this.context = context;
         this.runcount = 0;
         this.reqId = null;
 
+        seed(Math.floor(Math.random()*1000));
+
         this.run = this.run.bind(this);
         this.render = this.render.bind(this);
         this.update = this.update.bind(this);
-
     }
 
-
     update(t) {
-        this.circles.map(x=> x.update(t))
+        this.particles.map(x=> x.update(t))
     }
 
     render() {
-        this.circles.map(x=> x.render(this.context))
+        //this.context.fillStyle = 'black';
+        //this.context.fillRect(0, 0, this.context.canvas.width, this.context.canvas.height);
+        this.particles.map(x=> x.render())
     }
 
     run(t) {
         this.reqId = requestAnimationFrame(this.run);
-        this.render();
         this.update(t);
+        this.render();
         this.runcount += 1;
-        if (this.runcount > 140) {
+        if (this.runcount > STEPS) {
             cancelAnimationFrame(this.reqId);
         }
     }
 }
 
 
-class Circle {
-    constructor(x, y, r, color) {
+class Particle {
+    constructor(x, y, r, color, context) {
         this.x = x;
         this.y = y;
         this.r = r;
-        this.color = color
+        this.vx = 0.1;
+        this.vy = 0.1;
+        this.prevX = null;
+        this.prevY = null;
+        this.color = color;
+        this.context = context;
         this.dir = Math.random() > 0.5 ? 1: -1;
 
         this.update = this.update.bind(this);
@@ -108,29 +107,39 @@ class Circle {
     }
 
     update(t) {
+        this.prevX = this.x;
+        this.prevY = this.y;
         const rand = Math.random()*Math.random();
         const rand1 = Math.random();
-        this.x += (this.dir*rand1);
-        this.y += rand;
+        this.x = (this.x + this.vx);
+        this.y = (this.y + this.vy);
+        // this.y += 0.5 + PERLIN.noiseAt(t/(STEPS*10));
+        this.direction = 2 * Math.PI * perlin2(this.x * noiseZoom, this.y * noiseZoom);
+        this.vx += Math.cos(this.direction);
+        this.vy += Math.sin(this.direction);
     }
 
-    static random(colorShades=COLOR_PALETTE) {
+    static random(colorShades=COLOR_PALETTE, context, i=0) {
         const radius = parseInt(Math.random() * 2.5) + 1;
         const randx = parseInt(Math.random() * context.canvas.width);
-        const randy = parseInt(Math.random() * context.canvas.height);
+        const randy = i== 0 ? parseInt(Math.random() * context.canvas.height) : y;
         const randindex = parseInt(Math.random() * colorShades.length);
         const color = colorArrayToStr(colorShades[randindex]);
-        return new Circle(randx, randy, radius, color)
+        return new Particle(randx, randy, radius, color, context)
     }
 
-    render(context) {
-        context.beginPath();
-        context.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
-        context.fillStyle = this.color
-        context.fill();
+    render() {
+        if (this.x > this.context.canvas.width || this.y>this.context.canvas.height) {
+            return;
+        }
+        this.context.beginPath();
+        this.context.moveTo(this.prevX, this.prevY);
+        this.context.lineTo(this.x, this.y);
+        this.context.strokeStyle = this.color;
+        this.context.lineWidth = this.r;
+        this.context.stroke();
+        // this.context.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+        // this.context.fillStyle = this.color
+        // this.context.fill();
     }
-}
-
-function colorArrayToStr(arr) {
-    return `rgb(${arr[0]}, ${arr[1]}, ${arr[2]})`;
 }

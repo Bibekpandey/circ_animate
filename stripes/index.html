@@ -13,6 +13,7 @@
     </head>
     <body>
     </body>
+    <script src="perlin.js"></script>
     <script src="index.js"></script>
     <script>
         function createCanvas(id) {
@@ -27,14 +28,13 @@
         var canvas = createCanvas('hazy-canvas');
         document.body.appendChild(canvas)
 
-        console.log(canvas.width, canvas.height);
         var context = canvas.getContext('2d');
         context.fillStyle = 'black';
         context.fillRect(0, 0, canvas.width, canvas.height);
 
-        const elementsCount = parseInt(2.4 * canvas.width);
+        const elementsCount = parseInt(0.3 * canvas.width);
         const h = new Hazer(elementsCount, context);
-        h.run()
+        h.run(0)
     </script>
 </html>
 
