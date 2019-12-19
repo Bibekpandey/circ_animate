@@ -1,4 +1,4 @@
-const STEPS = 30;
+const STEPS = 150;
 const noiseZoom = 0.00085;
 
 function hslToRgb(h, s, l) {
@@ -51,6 +51,10 @@ function getRandomColorShades(steps=6) {
     return s;
 }
 
+function isWithinCanvas(canvas, obj) {
+    return obj.prevX >= 0 && obj.prevX <= canvas.width && obj.prevY >=0 && obj.prevY <= canvas.height;
+}
+
 
 class Hazer {
     constructor(numparticles=100, context) {
@@ -69,6 +73,7 @@ class Hazer {
 
     update(t) {
         this.particles.map(x=> x.update(t))
+        this.particles = this.particles.filter(x=>isWithinCanvas(this.context.canvas, x));
     }
 
     render() {
@@ -121,8 +126,8 @@ class Particle {
 
     static random(colorShades=COLOR_PALETTE, context, i=0) {
         const radius = parseInt(Math.random() * 2.5) + 1;
-        const randx = parseInt(Math.random() * context.canvas.width);
-        const randy = i== 0 ? parseInt(Math.random() * context.canvas.height) : y;
+        const randx = 0; // parseInt(Math.random() * context.canvas.width);
+        const randy =  i== 0 ? parseInt(Math.random() * context.canvas.height) : y;
         const randindex = parseInt(Math.random() * colorShades.length);
         const color = colorArrayToStr(colorShades[randindex]);
         return new Particle(randx, randy, radius, color, context)
