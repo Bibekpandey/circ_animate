@@ -27,7 +27,7 @@
         const center = {x: 200, y: 200};
         const point = {x: 0, y: 200 };
 
-        const sides = 6;
+        const sides = 3;
         const scaleFactor = 0.97;
         const numIter = 100/scaleFactor;
         const polyRotate = polygonRotateAngleForScaleDown(scaleFactor, Math.PI*2/sides);
@@ -52,7 +52,7 @@
             const color = '#'+rgbToHex(interpolateColor(fromColor, toColor, numIter, count));
             poly.render(ctx, color);
             poly = poly.scale(scaleFactor).rotate(polyRotate);
-            setTimeout(animate, 100, count + 1);
+            setTimeout(animate, 50, count + 1);
         }
         animate(0);
     </script>

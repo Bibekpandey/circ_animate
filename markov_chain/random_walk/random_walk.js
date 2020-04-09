@@ -4,14 +4,14 @@ const DEFAULT_TRANSITION = {
     "up": 0.5,
     "down": 0.5,
 };
-const STEPS = 2000000;
+const STEPS = 2000;
 const UNITSIZE = 2;
 
 
 class RandomWalk {
-    constructor(color="black", unitsize=UNITSIZE, steps=STEPS, transition=DEFAULT_TRANSITION) {
+    constructor(color="white", unitsize=UNITSIZE, steps=STEPS, transition=DEFAULT_TRANSITION) {
         this.color = color;
-        this.steps = 500;
+        this.steps = STEPS;
         this.unitsize = unitsize; // number of pixels to step per unit
         this.transition = transition;
         this.currentPos = {x: 0, y: 0};
@@ -27,7 +27,6 @@ class RandomWalk {
     }
 
     drawStep(ctx) {
-        console.log('draw');
         ctx.beginPath();
         const {x, y} = this.currentPos;
         ctx.moveTo(x*this.unitsize, y*this.unitsize);

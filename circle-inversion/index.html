@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>Image inversion</title>
+    </head>
+    <body>
+        <canvas id="image-canvas" height="600" width="600"></canvas>
+    </body>
+    <script>
+        const circle = {x: 50, y: 50, r: 100};
+        // Load image
+        const imgelem = document.getElementById('image');
+        const image = new Image;
+        image.onload = function() {
+            const dummyCanvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d')
+            canvas.width = image.width;
+            canvas.height = image.height;
+            ctx.drawImage(image, 0, 0);
+            const imageData = ctx.getImagedata(0, 0, image.width, image.height);
+        }
+        image.src = './bewakes.JPG';
+    </script>
+</html>

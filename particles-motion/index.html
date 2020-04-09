@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <title> HaZy </title>
+        <style>
+            body {
+                padding: 0px;
+                overflow: hidden;
+            }
+            #hazy-canvas {
+                border: solid 1px #777;
+            }
+        </style>
+    </head>
+    <body>
+    </body>
+    <script src="../stripes/perlin.js"></script>
+    <script src="index.js"></script>
+    <script>
+        function createCanvas(id) {
+            const bodyHeight = document.body.clientHeight;
+            const bodyWidth = document.body.clientWidth;
+            let canvas = document.createElement('canvas');
+            canvas.setAttribute('width', `${bodyWidth}`);
+            canvas.setAttribute('height', `${bodyHeight}`);
+            canvas.id = id;
+            return canvas;
+        }
+        var canvas = createCanvas('hazy-canvas');
+        document.body.appendChild(canvas)
+
+        var context = canvas.getContext('2d');
+        context.fillStyle = 'black';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        const particlesCount = parseInt(1.0 * canvas.width);
+        const h = new ParticlesMotion(particlesCount, context);
+        h.run(0)
+    </script>
+</html>
