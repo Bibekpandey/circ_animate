@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <title>Mendelbrot</title>
+    </head>
+    <body>
+        <canvas id="mendelbrot" height="800" width="1600" style="border:solid 2px; ibackground:black"></canvas>
+    </body>
+    <script>
+        var g_canvas = document.getElementById('mendelbrot');
+        var g_ctx = g_canvas.getContext('2d');
+        var g_zoom = 2;
+        var g_offset = {x: 0, y: 0};
+        var g_height = g_canvas.height;
+        var g_width = g_canvas.width;
+    </script>
+    <script src="index.js"></script>
+    <script>
+        getImageData(g_ctx, g_width, g_height, g_zoom, g_offset);
+        g_canvas.addEventListener(
+            'click',
+            (ev) => {
+                console.warn(ev);
+                var offx = ev.target.offsetLeft;
+                var offy = ev.target.offsetTop;
+                var clickedX = ev.clientX;
+                var clickedY = ev.clientY;
+                var absX = clickedX - offx;
+                var absY = clickedY - offy;
+                var nX = absX - g_width/2;
+                var nY = g_height/2 - absY;
+                g_offset.x = g_zoom * nX;
+                g_offset.y = g_zoom * nY;
+                getImageData(g_ctx, g_width, g_height, g_zoom, g_offset);
+            }
+        );
+    </script>
+</html>
