@@ -1,37 +1,96 @@
 <html>
     <head>
         <title>Mendelbrot</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        #zoom-control {
+            position: absolute;
+            top: 10;
+            left: 10;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .zoom-input {
+            padding: 3px;
+            font-size: 1.5em;
+            border-bottom: solid 1px;
+            text-align: center;
+            background: #ffffff77;
+        }
+        .zoom-input:hover {
+            cursor: pointer;
+            background: #ffffffaa;
+        }
+        #canvas-mask {
+            position: absolute;
+            display: none;
+            top: 0;
+            left: 0;
+            background: #999c;
+            z-index: 50;
+        }
+    </style>
     </head>
     <body>
-        <canvas id="mendelbrot" height="800" width="1600" style="border:solid 2px; ibackground:black"></canvas>
+        <div>
+            <div id="zoom-control">
+                <div class="zoom-input">+</div>
+                <div class="zoom-input"><b>-</b></div>
+            </div>
+            <div id="canvas-mask">
+            </div>
+            <canvas id="mendelbrot" height="500" width="500"> </canvas>
+        <div>
     </body>
     <script>
         var g_canvas = document.getElementById('mendelbrot');
         var g_ctx = g_canvas.getContext('2d');
-        var g_zoom = 2;
+        var g_zoom = 1/2;
+        var g_nZooms = 0;
         var g_offset = {x: 0, y: 0};
         var g_height = g_canvas.height;
         var g_width = g_canvas.width;
     </script>
     <script src="index.js"></script>
     <script>
-        getImageData(g_ctx, g_width, g_height, g_zoom, g_offset);
+        function hideMask() {
+            document.getElementById('canvas-mask').style.display = "none";
+        }
+        function showMask() {
+            document.getElementById('canvas-mask').style.display = "inline";
+        }
         g_canvas.addEventListener(
             'click',
             (ev) => {
-                console.warn(ev);
-                var offx = ev.target.offsetLeft;
-                var offy = ev.target.offsetTop;
-                var clickedX = ev.clientX;
-                var clickedY = ev.clientY;
-                var absX = clickedX - offx;
-                var absY = clickedY - offy;
-                var nX = absX - g_width/2;
-                var nY = g_height/2 - absY;
-                g_offset.x = g_zoom * nX;
-                g_offset.y = g_zoom * nY;
-                getImageData(g_ctx, g_width, g_height, g_zoom, g_offset);
+                showMask();
+                setTimeout(() => {
+                    var offx = ev.target.offsetLeft;
+                    var offy = ev.target.offsetTop;
+                    var clickedX = ev.clientX;
+                    var clickedY = ev.clientY;
+                    var absX = clickedX - offx;
+                    var absY = clickedY - offy;
+                    var nX = absX - g_width/2;
+                    var nY = g_height/2 - absY;
+                    g_offset.x = nX*(2*(g_nZooms + 1));
+                    g_offset.y = nY*(2*(g_nZooms + 1));
+                    g_nZooms += 1;
+                    g_zoom *= 2;
+                    render(g_ctx, g_width, g_height, g_zoom, g_offset);
+                    hideMask();
+                }, 100);
             }
         );
+
+        showMask();
+        document.getElementById('canvas-mask').style.width = g_width + 'px';
+        document.getElementById('canvas-mask').style.height = g_width + 'px';
+        setTimeout(() => {
+            render(g_ctx, g_width, g_height, g_zoom, g_offset);
+            hideMask();
+        }, 100);
     </script>
 </html>

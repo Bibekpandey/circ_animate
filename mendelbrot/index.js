@@ -1,13 +1,13 @@
-function getImageData(ctx, width, height, zoom, offset) {
+function render(ctx, width, height, zoom, offset) {
     var imageData = ctx.createImageData(width, height);
     var data = imageData.data;
     var midX = width/2;
     var midY = height/2;
     for(var i=0;i<data.length; i+=4) {
-        var x = (i/4) % width - midX;
-        var y = midY - Math.round(i/(4*width));
-        var normX = 8 * (x - offset.x) / (zoom*width);
-        var normY = 8 * (height/width) * (y - offset.y) / (zoom*height);
+        var x = (i/4) % width - midX + offset.x;
+        var y = midY - Math.round(i/(4*width)) + offset.y;
+        var normX = x / (zoom*width);
+        var normY = (height/width) * y / (zoom*height);
         var [iterations, z] = complexFunction({x: normX, y: normY}, {x: 0, y: 0}, 0);
         var color = numberToColor(iterations);
 
@@ -17,10 +17,13 @@ function getImageData(ctx, width, height, zoom, offset) {
         data[i+3] = 255;
     }
     ctx.putImageData(imageData, 0, 0);
+    // render center
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(width/2-1, height/2-1, 3, 3);
 }
 
 function numberToColor(num) {
-    return hslToRgb(num % 360, 100 - num%100, (num)%100);
+    return hslToRgb(360 - num % 360, 100 - num%100, (num)%100);
 }
 
 // Complex functions
@@ -29,7 +32,7 @@ function complexFunction(c, z, n) {
     if(n > MAX_STEP) {
         return [0, z];
     }
-    if (magnitude(z) > 10) {
+    if (magnitude(z) > 2) {
         return [n, z];
     }
     return complexFunction(c, sum(prod(z, z), c), n+1)
