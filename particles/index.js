@@ -1,8 +1,6 @@
-import { drawText, sampleCanvas, sampleImageCanvas } from './text-sampling.js';
-
 const zeroVector = () => ({x: 0, y: 0});
 
-export const defaultParticleProps = {
+const defaultParticleProps = {
     size: 2,
     position: zeroVector(),
     velocity: zeroVector(),
@@ -19,7 +17,7 @@ const defaultForceProps = {
     maxMagnitude: 50,
 };
 
-export class Force {
+class Force {
     constructor(props={}) {
         const forceProps = {
             ...defaultForceProps,
@@ -69,7 +67,7 @@ const defaultRendererProps = {
     particlesSpacing: 2,
 };
 
-export class ParticlesRenderer {
+class ParticlesRenderer {
     constructor( canvas,
         props={},
         particleProps={},
@@ -89,7 +87,6 @@ export class ParticlesRenderer {
         };
         this.canvas.height = this.props.height;
         this.canvas.width = this.props.width;
-        
 
         this.force = new Force(forceProps);
 
@@ -173,7 +170,6 @@ export class ParticlesRenderer {
             this.elements = createParticlesFromColoredSample(this.ctx, sample, {...this.particleProps}, this.props.particlesSpacing);
             this.start();
         };
-        
     }
 
     createParticles(x,y) {

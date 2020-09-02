@@ -1,11 +1,11 @@
-export function drawText(ctx, text, fontName='Helvetica', size=60, style='bold') {
+function drawText(ctx, text, fontName='Helvetica', size=60, style='bold') {
     console.log({fontName, size, style});
     ctx.fillStyle = 'black';
     ctx.font = `${style} ${size}px ${fontName}`;
     ctx.fillText(text,size, size);
 }
 
-export function sampleCanvas(ctx, pixVal=0, resolution=2) { // res 2 means, sample every second pixel in canvas
+function sampleCanvas(ctx, pixVal=0, resolution=2) { // res 2 means, sample every second pixel in canvas
     const W = ctx.canvas.width;
     const H = ctx.canvas.height;
 
@@ -75,7 +75,7 @@ export function sampleCanvas(ctx, pixVal=0, resolution=2) { // res 2 means, samp
     return sampledPoints;
 }
 
-export function sampleImageCanvas(ctx, resolution=550) {
+function sampleImageCanvas(ctx, resolution=550) {
     const W = ctx.canvas.width;
     const H = ctx.canvas.height;
     console.log({W, H});
