@@ -216,8 +216,8 @@ class Particle {
 
         // set random position initially
         this.state.position = {
-            x: plusMinus(Math.random() * 800),
-            y: plusMinus(Math.random() * 800),
+            x: plusMinus(Math.random() * ctx.canvas.width / 3),
+            y: plusMinus(Math.random() * ctx.canvas.height / 2),
         }
 
         this.render = this.render.bind(this);
