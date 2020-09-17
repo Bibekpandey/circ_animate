@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Linear programming</title>
+    </head>
+    <link rel="stylesheet" href="./style.css" />
+    <body>
+        <div id="container">
+            <canvas width=700 height=700 id="solution"></canvas>
+            <div id="inputs">
+            </div>
+        </div>
+    </body>
+    <script src="grid.js"></script>
+    <script src="functional.js"></script>
+    <script>
+        const canvas = document.getElementById("solution");
+        const grid = newGrid(canvas);
+
+        // Curry required functions
+        const curriedRenderPoint = curry(renderPoint, 3);
+        const curriedRenderLine = curry(renderLine, 5);
+
+        // Get partially applied functions
+        const point  = curriedRenderPoint(grid);
+        const line = curriedRenderLine(grid);
+
+        renderGrid(grid);
+        point(5, 5, "lightgreen");
+        line(0, 0, 6, 7, "skyblue", 2);
+        line(-10, -4, 10, 8, "magenta", 2);
+    </script>
+</html>
