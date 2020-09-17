@@ -65,6 +65,34 @@ const renderLine = (grid, x1, y1, x2, y2, color, width) => {
     ctx.stroke();
 };
 
-const renderExtendedLine = (grid, x1, y1, x2, y2, color) => {
-    // TODO later
+// of the form ax + by = c
+const renderLineEq = (grid, a, b, c, color, width) => {
+    if(a == 0 && b == 0) {
+        return;
+    } else if(a == 0) {
+        // render horizontal line
+        renderLine(grid, grid.xrange[0], c/b, grid.xrange[1], c/b, color, width);
+    } else if(b == 0) {
+        // render vertical line
+        renderLine(grid, c/a, grid.yrange[0], c/a, grid.yrange[1], color, width);
+    } else {
+        const y1 = (c - a * grid.xrange[0]) / b;
+        const y2 = (c - a * grid.xrange[1]) / b;
+        renderLine(grid, grid.xrange[0], y1, grid.xrange[1], y2, color, width);
+    }
+};
+
+const getLineEq = (x1, y1, x2, y2) => {
+    const dx = x2-x1;
+    const dy = y2-y1;
+    return {
+        a: -dy,
+        b: dx,
+        c: y1*dx - x1*dy,
+    };
+};
+
+const renderExtendedLine = (grid, x1, y1, x2, y2, color, width) => {
+    const lineEq = getLineEq(x1, y1, x2, y2);
+    renderLineEq(grid, lineEq.a, lineEq.b, lineEq.c, color, width);
 };

@@ -11,8 +11,8 @@
             </div>
         </div>
     </body>
+    <script src="utils.js"></script>
     <script src="grid.js"></script>
-    <script src="functional.js"></script>
     <script>
         const canvas = document.getElementById("solution");
         const grid = newGrid(canvas);
@@ -20,14 +20,27 @@
         // Curry required functions
         const curriedRenderPoint = curry(renderPoint, 3);
         const curriedRenderLine = curry(renderLine, 5);
+        const curriedRenderExtendedLine = curry(renderExtendedLine, 5);
 
         // Get partially applied functions
         const point  = curriedRenderPoint(grid);
         const line = curriedRenderLine(grid);
+        const lineExtended = curriedRenderExtendedLine(grid);
+
+        const system = {
+            objective: {c1: 3, c2: 2},
+            constraints: [  // constrints in the form a1X1 + ... anXn <= b1
+                {a1: -1, b: 0}, // x >= 0 equiv to -x <= 0
+                {a2: -1, b: 0}, // y >= 0 equiv to -y <= 0
+                {a1: 1, a2: 2, b: 4}, // x + 2y <= 4
+                {a1: 1, a2: -1, b: 1}, // x - y <= 1
+            ],
+        };
+        const colors = system.constraints.map(_ => randomColor());
 
         renderGrid(grid);
         point(5, 5, "lightgreen");
-        line(0, 0, 6, 7, "skyblue", 2);
+        lineExtended(0, 0, 6, 7, "skyblue", 2);
         line(-10, -4, 10, 8, "magenta", 2);
     </script>
 </html>

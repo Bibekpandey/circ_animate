@@ -11,3 +11,12 @@ const curry = (func, numargs) => {
         }
     };
 };
+
+
+const randomColor = () => {
+    const chars = '00123456789abcdeff';
+    const rand = () => Math.random() * chars.length
+    return '#' + [...Array(6)].map(_ => chars[parseInt(rand())]).join('');
+};
+
+window.randomColor = randomColor;
