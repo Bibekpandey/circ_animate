@@ -41,7 +41,6 @@ const renderGrid = (grid) => {
     }
 };
 
-
 const renderPoint = (grid, x, y, color, r) => {
     const ctx = grid.canvas.getContext('2d');
     const rad = r || 3;
@@ -80,6 +79,7 @@ const renderLineEq = (grid, a, b, c, color, width) => {
         const y2 = (c - a * grid.xrange[1]) / b;
         renderLine(grid, grid.xrange[0], y1, grid.xrange[1], y2, color, width);
     }
+    console.warn('lineq');
 };
 
 const getLineEq = (x1, y1, x2, y2) => {

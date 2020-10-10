@@ -20,11 +20,17 @@ const getIntersection = (a1, b1, c1, a2, b2, c2) => {
 
 const renderState = (renderers, state) => {
     if(!state.feasibleRegion) return;
-    // Draw curr line
     renderers.polygon(state.feasibleRegion);
+    // Draw lines
+    const constraintLines = state.constraints.slice(0, state.step-1);
+    const currLine = state.constraints[state.step-1];
+    renderers.lineEq(currLine.a, currLine.b, currLine.c, '#f99f', 2);
+    constraintLines.map(lineEq => renderers.lineEq(lineEq.a, lineEq.b, lineEq.c, '#f99a'));
     if(state.polygons.length >= 3) {
-        renderers.polygonOutline(state.polygons, 'blue');
+        renderers.polygon(state.polygons, 'orange');
+        renderers.polygonOutline(state.polygons, 'skyblue');
     }
+    state.polygons.map(point => renderers.point(...point, "red"));
 };
 
 const nextState = (grid, systemState) => {
@@ -92,14 +98,11 @@ const nextState = (grid, systemState) => {
         }
     }
     newState.feasibleRegion = regionPolygon;
-    newState.polygons = getPolygons(systemState);
+    newState.polygons = getPolygon(systemState);
     return newState;
 };
 
-const getPolygons = (state) => {
-    if (state.constraints.length < 3) return []; // less than 3 constraints can't form polygon
-    if(state.step < 2) return []; // at this point, there are no intersecting points
-
+const getPolygon = (state) => {
     const areConstraintsSatisfied = ([x, y]) =>
         state.constraints.slice(0, state.step+1).reduce(
             (a, c) => a && (c.a*x + c.b*y <= c.c),
@@ -107,21 +110,17 @@ const getPolygons = (state) => {
         );
 
     const intersections = [];
-    if (state.polygon.length < 3) { // means no bounded region
-        for(let i=0; i < state.step; i++) {
-            for(let j = i+1; j <= state.step; j++) {
-                const c1 = state.constraints[i],
-                      c2 = state.constraints[j];
-                intersections.push(getIntersection(c1.a, c1.b, c1.c, c2.a, c2.b, c2.c));
-            }
+    for(let i=0; i < state.step; i++) {
+        for(let j = i+1; j <= state.step; j++) {
+            const c1 = state.constraints[i],
+                  c2 = state.constraints[j];
+            intersections.push(getIntersection(c1.a, c1.b, c1.c, c2.a, c2.b, c2.c));
         }
-        const validPolygonPoints = intersections.filter(areConstraintsSatisfied);
-        if (validPolygonPoints.length == 3) return antiClockWiseTriangles(validPolygonPoints);
-        if (validPolygonPoints.length > 3) return convexHull(validPolygonPoints);
     }
-    else { // we have a bounded region
-    }
-    return [];
+    const validPolygonPoints = intersections.filter(areConstraintsSatisfied);
+    if(validPolygonPoints.length < 3) return validPolygonPoints;
+    if (validPolygonPoints.length == 3) return antiClockWiseTriangles(validPolygonPoints);
+    if (validPolygonPoints.length > 3) return convexHull(validPolygonPoints);
 };
 
 const antiClockWiseTriangles = points => {

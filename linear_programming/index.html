@@ -16,11 +16,13 @@
     <script src="grid.js"></script>
     <script>
         const canvas = document.getElementById("solution");
+        const ctx = canvas.getContext('2d');
         const grid = newGrid(canvas);
 
         // Curry required functions
         const curriedRenderPoint = curry(renderPoint, 3);
         const curriedRenderLine = curry(renderLine, 5);
+        const curriedRenderLineEq = curry(renderLineEq, 4);
         const curriedRenderExtendedLine = curry(renderExtendedLine, 5);
         const curriedRenderPolygon = curry(renderPolygon, 2);
         const curriedRenderPolygonOutline = curry(renderPolygonOutline, 2);
@@ -30,20 +32,21 @@
         const next = curriedNextState(grid);
         const point  = curriedRenderPoint(grid);
         const line = curriedRenderLine(grid);
+        const lineEq = curriedRenderLineEq(grid);
         const lineExtended = curriedRenderExtendedLine(grid);
         const polygon = curriedRenderPolygon(grid);
         const polygonOutline = curriedRenderPolygonOutline(grid);
-        const renderers = { point, line, lineExtended, polygon, polygonOutline };
+        const renderers = { point, line, lineEq, lineExtended, polygon, polygonOutline };
 
         const render = curry(renderState, 2)(renderers);
 
         const objCons = {
             objective: {a: 3, b: 2},
             constraints: [  // constrints in the form a1X1 + ... anXn <= b1
-                {a: -1, b: 0, c: 0}, // x >= 0 equiv to -x <= 0
                 {a: 0, b: -1, c: 0}, // y >= 0 equiv to -y <= 0
                 {a: 1, b: 2, c: 4}, // x + 2y <= 4
                 {a: 1, b: -1, c: 1}, // x - y <= 1
+                {a: -1, b: 0, c: 0}, // x >= 0 equiv to -x <= 0
             ],
         };
         const colors = objCons.constraints.map(_ => randomColor());
@@ -51,11 +54,13 @@
 
         const step = () => {
             systemState = next(systemState);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            renderGrid(grid);
             render(systemState);
         };
         document.addEventListener('keydown', ev => ev.keyCode == 32 ? step(): null);
-
         renderGrid(grid);
+
         // point(5, 5, "lightgreen");
         // lineExtended(0, 0, 6, 7, "skyblue", 2);
         // line(0, 1, -1, 0, "magenta", 2);
