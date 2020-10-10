@@ -96,3 +96,26 @@ const renderExtendedLine = (grid, x1, y1, x2, y2, color, width) => {
     const lineEq = getLineEq(x1, y1, x2, y2);
     renderLineEq(grid, lineEq.a, lineEq.b, lineEq.c, color, width);
 };
+
+const renderPolygon = (grid, points, color) => {
+    const ctx = grid.canvas.getContext('2d');
+    const [first, ...rest] = points;
+    ctx.fillStyle = color || '#22ff2225';
+    ctx.beginPath();
+    ctx.moveTo(...transformCoords(grid, ...first));
+    rest.map(x => ctx.lineTo(...transformCoords(grid, ...x)));
+    ctx.closePath();
+    ctx.fill();
+};
+
+const renderPolygonOutline = (grid, points, color, lineWidth) => {
+    const ctx = grid.canvas.getContext('2d');
+    const [first, ...rest] = points;
+    ctx.strokeStyle = color || 'skyblue';
+    ctx.lineWidth = lineWidth || 2;
+    ctx.beginPath();
+    ctx.moveTo(...transformCoords(grid, ...first));
+    rest.map(x => ctx.lineTo(...transformCoords(grid, ...x)));
+    ctx.closePath();
+    ctx.stroke();
+};

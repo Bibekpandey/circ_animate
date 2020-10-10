@@ -12,6 +12,7 @@
         </div>
     </body>
     <script src="utils.js"></script>
+    <script src="lp.js"></script>
     <script src="grid.js"></script>
     <script>
         const canvas = document.getElementById("solution");
@@ -21,26 +22,43 @@
         const curriedRenderPoint = curry(renderPoint, 3);
         const curriedRenderLine = curry(renderLine, 5);
         const curriedRenderExtendedLine = curry(renderExtendedLine, 5);
+        const curriedRenderPolygon = curry(renderPolygon, 2);
+        const curriedRenderPolygonOutline = curry(renderPolygonOutline, 2);
+        const curriedNextState = curry(nextState, 2);
 
         // Get partially applied functions
+        const next = curriedNextState(grid);
         const point  = curriedRenderPoint(grid);
         const line = curriedRenderLine(grid);
         const lineExtended = curriedRenderExtendedLine(grid);
+        const polygon = curriedRenderPolygon(grid);
+        const polygonOutline = curriedRenderPolygonOutline(grid);
+        const renderers = { point, line, lineExtended, polygon, polygonOutline };
 
-        const system = {
-            objective: {c1: 3, c2: 2},
+        const render = curry(renderState, 2)(renderers);
+
+        const objCons = {
+            objective: {a: 3, b: 2},
             constraints: [  // constrints in the form a1X1 + ... anXn <= b1
-                {a1: -1, b: 0}, // x >= 0 equiv to -x <= 0
-                {a2: -1, b: 0}, // y >= 0 equiv to -y <= 0
-                {a1: 1, a2: 2, b: 4}, // x + 2y <= 4
-                {a1: 1, a2: -1, b: 1}, // x - y <= 1
+                {a: -1, b: 0, c: 0}, // x >= 0 equiv to -x <= 0
+                {a: 0, b: -1, c: 0}, // y >= 0 equiv to -y <= 0
+                {a: 1, b: 2, c: 4}, // x + 2y <= 4
+                {a: 1, b: -1, c: 1}, // x - y <= 1
             ],
         };
-        const colors = system.constraints.map(_ => randomColor());
+        const colors = objCons.constraints.map(_ => randomColor());
+        let systemState = LPState(objCons, colors);
+
+        const step = () => {
+            systemState = next(systemState);
+            render(systemState);
+        };
+        document.addEventListener('keydown', ev => ev.keyCode == 32 ? step(): null);
 
         renderGrid(grid);
-        point(5, 5, "lightgreen");
-        lineExtended(0, 0, 6, 7, "skyblue", 2);
-        line(-10, -4, 10, 8, "magenta", 2);
+        // point(5, 5, "lightgreen");
+        // lineExtended(0, 0, 6, 7, "skyblue", 2);
+        // line(0, 1, -1, 0, "magenta", 2);
+        // polygon([[1,2], [4,4], [15,6]]);
     </script>
 </html>
