@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hex Game</title>
+        <style>
+            body {
+                width: 80%;
+                margin: auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center
+            }
+            canvas {
+                border: solid 2px gray;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>HEX</h1>
+        <canvas id="game" width=780 height=600 id="solution"></canvas>
+        <div/>
+        <script src="./index.js"></script>
+        <script>
+            const canvas = document.querySelector('#game');
+            const context = canvas.getContext('2d');
+            const r = 20;
+            const v = r * sin(SIXTY);
+            const X = parseInt(canvas.width * 1.5 / (r * 2));
+            const Y = parseInt(canvas.height* 1.5 / (r * 2));
+            const hexagons = [...Array(X)].map(
+                (x, i) => [...Array(Y)].map((y, j) => new Hexagon(i, j, r))
+            ).flat();
+
+            hexagons.map(x => x.draw(context));
+        </script>
+    </body>
+</html>
