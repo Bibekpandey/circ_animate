@@ -24,17 +24,16 @@
             const r = 20;
             const canvas = document.querySelector('#game');
             const context = canvas.getContext('2d');
-            const X = parseInt(canvas.width * 1.5 / (r * 2));
-            const Y = parseInt(canvas.height* 1.5 / (r * 2));
-
             const v = hexHeight(r);
+            const X = parseInt(canvas.width * 1.5 / (r * 2));
+            const Y = parseInt(canvas.height / v);
 
             const hexagons = [...Array(X)].map(
-                (x, i) => [...Array(Y)].map((y, j) => new Hexagon(i, j, r))
+                (x, i) => [...Array(Y+1)].map((y, j) => new Hexagon(i, j, r))
             );
 
             const overlayGrid = [...Array(parseInt(canvas.width/(1.5*r)))].map(
-                (x, i) => [...Array(parseInt(canvas.height/(v)))].map(
+                (x, i) => [...Array(parseInt(canvas.height/v))].map(
                     (y, j) => new OverlayCell(i, j, 1.5*r, v)
                 )
             );
@@ -48,23 +47,13 @@
                 context: context,
             }
 
-            const gridC = 12, gridR = 3;
-            state.grid[gridC][gridR].fill = true;
-            // state.grid[gridC+5][gridR].fill = true;
-
-            state.hexagons[gridC+1][gridR+1].fill = true;
-            state.hexagons[gridC][gridR + (gridC % 2 == 0 ? 0 : 1)].fill = true;
-            state.hexagons[gridC][gridR+(gridC % 2 == 0 ? 1 : 2)].fill = true;
-
             canvas.addEventListener('mousemove', (e) => onCanvasMouseOver(state, e));
-
-
             render();
 
             function render() {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 hexagons.map(col => col.map(x => x.draw(context)));
-                overlayGrid.map(grids => grids.map(cell => cell.draw(context)));
+                // overlayGrid.map(grids => grids.map(cell => cell.draw(context)));
                 setTimeout(render, 1000/60);
             }
         </script>

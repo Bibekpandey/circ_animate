@@ -11,23 +11,35 @@ function onCanvasMouseOver(conf, e) {
     // Find the row number and column number of overlay grid
     const col = Math.floor((canvasX - conf.r/2) / (1.5*conf.r));
     const row = Math.floor(((col%2 === 0 ? 0 : -conf.v/2) + canvasY) / hexHeight(conf.r));
-    if(col < 0 || row < 0) return;
+    if(col < 0 || row < 0 || col >= conf.cols || row >= conf.rows) return;
+    // conf.grid.map(cols => cols.map(cell => cell.fill = false));
+    conf.hexagons.map(cols => cols.map(cell => cell.fill = false));
+    // Get 3 hexagons touched by the cell
+    const hex1r = row + 1, hex1c = col + 1;
+    const hex2r = row + (col % 2 == 0 ? 0 : 1), hex2c = col;
+    const hex3r = row + (col % 2 == 0 ? 1 : 2), hex3c = col;
+    // conf.grid[col][row].fill = true;
 
-    try {
-        conf.grid.map(cols => cols.map(cell => cell.fill = false));
-        conf.hexagons.map(cols => cols.map(cell => cell.fill = false));
-        // Get 3 hexagons touched by the cell
-        const hex1r = row + 1, hex1c = col + 1;
-        const hex2r = row + (col % 2 == 0 ? 0 : 1), hex2c = col;
-        const hex3r = row + (col % 2 == 0 ? 1 : 2), hex3c = col;
-        conf.grid[col][row].fill = true;
-        conf.hexagons[hex1c][hex1r].fill = true;
-        conf.hexagons[hex2c][hex2r].fill = true;
-        conf.hexagons[hex3c][hex3r].fill = true;
+    const d1 = conf.hexagons[hex1c][hex1r].distanceSq(canvasX, canvasY);
+    let d2 = d3 = 9999999999;
+
+    if (hex2r < conf.rows) {
+        // conf.hexagons[hex2c][hex2r].fill = true;
+        d2 = conf.hexagons[hex2c][hex2r].distanceSq(canvasX, canvasY);
     }
-    catch(e) {
-        console.warn(e);
-        console.log({col, row, rows: conf.rows});
+    if (hex3r < conf.rows) {
+        // conf.hexagons[hex3c][hex3r].fill = true;
+        d3 = conf.hexagons[hex3c][hex3r].distanceSq(canvasX, canvasY);
+    }
+
+    if (d1 <= d2 && d1 <= d3) {
+        conf.hexagons[hex1c][hex1r].fill = true;
+    }
+    else if (d2 <= d3 && d2 <= d1) {
+        conf.hexagons[hex2c][hex2r].fill = true;
+    }
+    else if (d3 <= d2 && d3 <= d1) {
+        conf.hexagons[hex3c][hex3r].fill = true;
     }
 }
 
@@ -63,6 +75,12 @@ class Hexagon {
         this.size = size;
 
         this.draw = this.draw.bind(this);
+    }
+
+    distanceSq(x, y) {
+        const dx = this.x - x;
+        const dy = this.y - y;
+        return dx*dx + dy*dy;
     }
 
     draw(context) {
